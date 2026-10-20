@@ -20,6 +20,21 @@ def create_app(config_name=None):
     csrf.init_app(app)
     mail.init_app(app)
 
+    # Auto-initialize database tables and initial seed data if not present (skip in test mode)
+    if config_name != 'testing':
+        with app.app_context():
+            try:
+                from sqlalchemy import inspect
+                inspector = inspect(db.engine)
+                if not inspector.has_table('site_settings'):
+                    db.create_all()
+                    from scripts.seed_data import run_seed
+                    run_seed()
+                    from scripts.create_admin import run_create_admin
+                    run_create_admin()
+            except Exception as e:
+                app.logger.warning(f"Database auto-init note: {e}")
+
     # Login loader
     @login_manager.user_loader
     def load_user(user_id):
@@ -28,11 +43,17 @@ def create_app(config_name=None):
     # Context processors for global template availability
     @app.context_processor
     def inject_global_data():
-        from app.services.settings_service import SettingsService
-        status_text, status_class = SettingsService.get_event_status()
-        active_logo = SettingsService.get_active_logo()
-        settings = SettingsService.get_all_settings()
-        timeline = SettingsService.get_timeline()
+        try:
+            from app.services.settings_service import SettingsService
+            status_text, status_class = SettingsService.get_event_status()
+            active_logo = SettingsService.get_active_logo()
+            settings = SettingsService.get_all_settings()
+            timeline = SettingsService.get_timeline()
+        except Exception:
+            status_text, status_class = ('Registration Open', 'badge-success')
+            active_logo = '/static/images/official_logo.jpg'
+            settings = {}
+            timeline = {}
         return {
             'site_settings': settings,
             'active_logo': active_logo,

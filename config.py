@@ -26,13 +26,17 @@ class Config:
         elif raw_db_url.startswith('postgres://'):
             raw_db_url = raw_db_url.replace('postgres://', 'postgresql://', 1)
         SQLALCHEMY_DATABASE_URI = raw_db_url
+    elif os.getenv('RENDER') and MYSQL_HOST == 'localhost':
+        # Render cloud environment fallback before external DATABASE_URL is added to environment
+        SQLALCHEMY_DATABASE_URI = f"sqlite:///{os.path.join(basedir, 'render_app.db')}"
     else:
         SQLALCHEMY_DATABASE_URI = default_db_uri
+
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_recycle': 280,
         'pool_pre_ping': True,
-    }
+    } if not SQLALCHEMY_DATABASE_URI.startswith('sqlite') else {}
 
     # Session and Cookie Security
     SESSION_COOKIE_HTTPONLY = True

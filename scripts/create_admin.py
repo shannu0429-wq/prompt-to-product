@@ -18,41 +18,57 @@ def run_create_admin(full_name=None, email=None, password=None):
         print("Prompt to Product – Secure Administrator Setup")
         print("=" * 60)
 
+        is_interactive = sys.stdin.isatty() and not os.getenv('RENDER')
+
         if not full_name:
-            full_name = input("Enter Super Admin Full Name [SSRS Super Admin]: ").strip()
+            if is_interactive:
+                full_name = input("Enter Super Admin Full Name [SSRS Super Admin]: ").strip()
             if not full_name:
-                full_name = "SSRS Super Admin"
+                full_name = os.getenv('ADMIN_NAME', 'SSRS Super Admin')
 
         if not email:
-            email = input("Enter Super Admin Email: ").strip().lower()
-            while not email or '@' not in email:
-                print("Error: A valid email address is required.")
+            if is_interactive:
                 email = input("Enter Super Admin Email: ").strip().lower()
+                while not email or '@' not in email:
+                    print("Error: A valid email address is required.")
+                    email = input("Enter Super Admin Email: ").strip().lower()
+            if not email:
+                email = os.getenv('ADMIN_EMAIL', 'admin@ssrsgc.com').strip().lower()
 
         existing = User.query.filter_by(email=email).first()
         if existing:
             print(f"User with email '{email}' already exists.")
-            promote = input(f"Promote '{email}' to super_admin role? (y/N): ").strip().lower()
-            if promote == 'y':
+            if is_interactive:
+                promote = input(f"Promote '{email}' to super_admin role? (y/N): ").strip().lower()
+                if promote == 'y':
+                    existing.role = 'super_admin'
+                    existing.is_active = True
+                    existing.email_verified = True
+                    db.session.commit()
+                    AuditLog.record('user_promoted_to_super_admin', 'user', existing.id)
+                    print(f"Success! {email} is now a super_admin.")
+            else:
                 existing.role = 'super_admin'
                 existing.is_active = True
                 existing.email_verified = True
                 db.session.commit()
-                AuditLog.record('user_promoted_to_super_admin', 'user', existing.id)
-                print(f"Success! {email} is now a super_admin.")
+                print(f"{email} verified as super_admin.")
             return
 
         if not password:
-            while True:
-                password = getpass.getpass("Enter Super Admin Password (min 8 chars): ")
-                if len(password) < 8:
-                    print("Error: Password must be at least 8 characters long.")
-                    continue
-                confirm = getpass.getpass("Confirm Super Admin Password: ")
-                if password != confirm:
-                    print("Error: Passwords do not match.")
-                    continue
-                break
+            if is_interactive:
+                while True:
+                    password = getpass.getpass("Enter Super Admin Password (min 8 chars): ")
+                    if len(password) < 8:
+                        print("Error: Password must be at least 8 characters long.")
+                        continue
+                    confirm = getpass.getpass("Confirm Super Admin Password: ")
+                    if password != confirm:
+                        print("Error: Passwords do not match.")
+                        continue
+                    break
+            else:
+                password = os.getenv('ADMIN_PASSWORD', 'AdminPassword2026!')
 
         admin_user = User(
             full_name=full_name,
