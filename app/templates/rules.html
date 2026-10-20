@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Rules & Guidelines | Prompt to Product{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 3rem; padding-bottom: 4rem;">
+    <div style="max-width: 850px; margin: 0 auto;">
+        
+        <div style="text-align: center; margin-bottom: 3rem;">
+            <span class="badge badge-primary">Official Handbook</span>
+            <h1 style="font-size: 2.75rem; margin-top: 0.75rem;" class="text-gradient">Rules &amp; Guidelines</h1>
+            <p class="lead">Terms and conditions governing Prompt to Product – AI Web Challenge</p>
+        </div>
+
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <h3 style="color: #38bdf8; margin-bottom: 0.75rem;">1. Eligibility &amp; Team Formation</h3>
+            <ul style="color: #cbd5e1; line-height: 1.8; padding-left: 20px;">
+                <li>The hackathon is open to students, developers, and independent creators across India.</li>
+                <li>Teams must consist of <strong>1 to 4 members</strong> (solo participants or teams up to 4).</li>
+                <li>The team leader creates a single account for the team and handles project submission. Additional members do not need to register separate portal accounts.</li>
+                <li>A participant may only be a registered member of one team. Multi-team memberships will result in disqualification.</li>
+            </ul>
+        </div>
+
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <h3 style="color: var(--accent-cyan); margin-bottom: 0.75rem;">2. AI Tools &amp; Prompt Engineering Policy</h3>
+            <ul style="color: #cbd5e1; line-height: 1.8; padding-left: 20px;">
+                <li>The use of AI coding assistants (ChatGPT, Claude, Gemini, Cursor, GitHub Copilot) is <strong>enthusiastically encouraged</strong>.</li>
+                <li>Teams must demonstrate thoughtful prompt orchestration, system design, and functional refinement. Simply copy-pasting broken AI hallucinated code will be penalized in code quality.</li>
+                <li>All third-party APIs used must be legally acquired and compliant with provider terms.</li>
+            </ul>
+        </div>
+
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <h3 style="color: var(--gold); margin-bottom: 0.75rem;">3. Submission Deliverables &amp; Format</h3>
+            <ul style="color: #cbd5e1; line-height: 1.8; padding-left: 20px;">
+                <li>The portal accepts <strong>ONLY a live deployed public website URL</strong> (HTTP/HTTPS).</li>
+                <li>Do NOT upload ZIP files, PDF documents, or video files to this portal.</li>
+                <li>The deployed application must remain publicly accessible without requiring credentials through the entire judging period.</li>
+                <li>Teams must also submit on the official Unstop opportunity page to ensure institutional compliance.</li>
+            </ul>
+        </div>
+
+        <div class="card" style="margin-bottom: 1.5rem;">
+            <h3 style="color: #f87171; margin-bottom: 0.75rem;">4. Disqualification Criteria</h3>
+            <ul style="color: #cbd5e1; line-height: 1.8; padding-left: 20px;">
+                <li>Submitting non-functional or unreachable links (such as <code>http://localhost:3000</code>).</li>
+                <li>Submitting malicious software, phishing pages, or offensive materials.</li>
+                <li>Plagiarism or misrepresenting existing commercial products as original challenge submissions.</li>
+                <li>Violating the submission deadline without explicit prior administrator extension.</li>
+            </ul>
+        </div>
+
+        <div class="card" style="margin-bottom: 2rem;">
+            <h3 style="color: #34d399; margin-bottom: 0.75rem;">5. Evaluation &amp; Jury Decisions</h3>
+            <ul style="color: #cbd5e1; line-height: 1.8; padding-left: 20px;">
+                <li>Submissions are evaluated across 6 categories for a total of 60 marks.</li>
+                <li>Decisions made by the technical evaluation jury appointed by SSRS Group of Companies are final and binding.</li>
+                <li>Top 3 teams will receive official Certificates of Excellence. Verified participants submitting compliant projects receive participation certificates.</li>
+            </ul>
+        </div>
+
+        <div style="text-align: center;">
+            <a href="{{ url_for('registration.register') }}" class="btn btn-lg btn-primary">Acknowledge Rules &amp; Register</a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

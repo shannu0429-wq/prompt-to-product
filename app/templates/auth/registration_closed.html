@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Registrations Closed | Prompt to Product{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 5rem; padding-bottom: 5rem; text-align: center;">
+    <div style="max-width: 550px; margin: 0 auto;">
+        <div class="card" style="padding: 3rem 2rem;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">🔒</div>
+            <span class="badge badge-danger" style="margin-bottom: 1rem;">Registrations Closed</span>
+            <h1 style="font-size: 2rem; color: #ffffff; margin-bottom: 0.75rem;">Registration Window Ended</h1>
+            <p style="color: var(--text-secondary); line-height: 1.7; margin-bottom: 2rem;">
+                The official registration deadline for Prompt to Product – AI Web Challenge has passed.
+                If your team is already registered, please sign in below to manage your submission.
+            </p>
+            <div style="display: flex; justify-content: center; gap: 1rem;">
+                <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Sign In to Dashboard</a>
+                <a href="{{ url_for('public.index') }}" class="btn btn-outline">Back to Homepage</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Internal Server Error (500) | Prompt to Product{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 5rem; padding-bottom: 5rem; text-align: center;">
+    <div style="max-width: 550px; margin: 0 auto;">
+        <div class="card" style="padding: 3rem 2rem; border-top: 4px solid var(--danger);">
+            <div style="font-size: 3rem; margin-bottom: 0.5rem;">⚙️</div>
+            <span class="badge badge-danger" style="margin-bottom: 1rem;">Error 500</span>
+            <h1 style="font-size: 2rem; color: #ffffff; margin-bottom: 0.75rem;">Internal Server Error</h1>
+            <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 2rem;">
+                An unexpected condition was encountered. Our technical team has been notified. Any pending database transactions were rolled back safely to prevent data corruption.
+            </p>
+            <div style="display: flex; justify-content: center; gap: 1rem;">
+                <a href="{{ url_for('public.index') }}" class="btn btn-primary">Return to Homepage</a>
+                <a href="{{ url_for('public.contact') }}" class="btn btn-outline">Contact Support</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

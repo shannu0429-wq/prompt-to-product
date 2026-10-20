@@ -1,0 +1,130 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Problem Statement Management{% endblock %}
+{% block page_title %}Problem Statement Management{% endblock %}
+
+{% block admin_content %}
+<div style="max-width: 950px;">
+
+    <!-- Current Published Status Banner -->
+    <div class="card" style="margin-bottom: 2rem; border-left: 4px solid {% if current_published %}var(--success){% else %}var(--warning){% endif %};">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <span style="font-size: 0.8rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Live Version on Website</span>
+                {% if current_published %}
+                    <h3 style="color: #ffffff; margin: 0.25rem 0;">v{{ current_published.version }}: {{ current_published.title }}</h3>
+                    <p style="color: #cbd5e1; font-size: 0.85rem; margin: 0;">Published at: {{ current_published.published_at|ist_datetime }}</p>
+                {% else %}
+                    <h3 style="color: #f59e0b; margin: 0.25rem 0;">No Statement Published (Participants see 'Coming Soon')</h3>
+                {% endif %}
+            </div>
+            {% if current_published %}
+            <form method="POST" action="{{ url_for('admin.problem_statement') }}" onsubmit="return confirm('Are you sure you want to unpublish this problem statement?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="action" value="unpublish">
+                <input type="hidden" name="statement_id" value="{{ current_published.id }}">
+                <button type="submit" class="btn btn-sm btn-danger">Unpublish (Set to Draft)</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Create / Edit Form -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <h3 style="color: #ffffff; margin-bottom: 1rem;">Create or Edit Problem Statement</h3>
+
+        {% set stmt = current_published or (statements[0] if statements else None) %}
+
+        <form method="POST" action="{{ url_for('admin.problem_statement') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="statement_id" value="{{ stmt.id if stmt else '' }}">
+
+            <div class="form-group">
+                <label class="form-label">Problem Statement Title <span class="required">*</span></label>
+                <input type="text" name="title" class="form-control" value="{{ stmt.title if stmt else '' }}" placeholder="e.g. AI-Powered Smart Web Solution..." required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Challenge Overview / Description <span class="required">*</span></label>
+                <textarea name="description" class="form-control" rows="3" placeholder="Core theme and context..." required>{{ stmt.description if stmt else '' }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">1. Target Objectives</label>
+                <textarea name="objectives" class="form-control" rows="3" placeholder="Key goals participants must achieve...">{{ stmt.objectives if stmt else '' }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">2. Requirements &amp; Expected Features</label>
+                <textarea name="requirements" class="form-control" rows="4" placeholder="Technical specs, responsive UI, AI features...">{{ stmt.requirements if stmt else '' }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">3. Rules &amp; Technical Guidelines</label>
+                <textarea name="guidelines" class="form-control" rows="3" placeholder="Permitted tools, deployment notes...">{{ stmt.guidelines if stmt else '' }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">4. Evaluation Rubric</label>
+                <textarea name="evaluation_criteria" class="form-control" rows="4" placeholder="Marking breakdown (60 marks total)...">{{ stmt.evaluation_criteria if stmt else '' }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">5. Submission Instructions</label>
+                <textarea name="submission_instructions" class="form-control" rows="3" placeholder="Deployed public URL instructions...">{{ stmt.submission_instructions if stmt else '' }}</textarea>
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap;">
+                <button type="submit" name="action" value="save_draft" class="btn btn-outline">
+                    Save as Draft
+                </button>
+                <button type="submit" name="action" value="publish" class="btn btn-primary" onclick="return confirm('Publish this version to all public visitors and logged-in participants?');">
+                    Publish Immediately &rarr;
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Version History Table -->
+    <div class="table-card">
+        <div class="table-header">
+            <h3 class="table-title">Publication &amp; Version History</h3>
+        </div>
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Version</th>
+                        <th>Title</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Published At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in statements %}
+                    <tr>
+                        <td><strong>v{{ s.version }}</strong></td>
+                        <td style="color: #ffffff;">{{ s.title }}</td>
+                        <td>
+                            {% if s.status == 'published' %}
+                                <span class="badge badge-success">Published</span>
+                            {% else %}
+                                <span class="badge badge-secondary">Draft</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ s.created_at|ist_datetime }}</td>
+                        <td>{{ s.published_at|ist_datetime if s.published_at else '—' }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #94a3b8; padding: 1.5rem;">No statement records yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Announcements{% endblock %}
+{% block page_title %}Announcements &amp; Broadcasts{% endblock %}
+
+{% block admin_content %}
+<div style="max-width: 900px;">
+
+    <!-- Create Announcement Form -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <h3 style="color: #ffffff; margin-bottom: 1rem;">Publish New Announcement</h3>
+
+        <form method="POST" action="{{ url_for('admin.announcements') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="create">
+
+            <div class="form-group">
+                <label class="form-label">Announcement Title <span class="required">*</span></label>
+                <input type="text" name="title" class="form-control" placeholder="e.g. Submissions Now Open!" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Message Content <span class="required">*</span></label>
+                <textarea name="message" class="form-control" rows="3" placeholder="Enter broadcast text for participants..." required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                Publish Announcement
+            </button>
+        </form>
+    </div>
+
+    <!-- Announcements List -->
+    <div class="table-card">
+        <div class="table-header">
+            <h3 class="table-title">Existing Announcements ({{ announcements|length }})</h3>
+        </div>
+
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Title &amp; Message</th>
+                        <th>Status</th>
+                        <th>Published Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in announcements %}
+                    <tr>
+                        <td>
+                            <strong style="color: #ffffff;">{{ a.title }}</strong>
+                            <p style="margin: 0.25rem 0 0; color: #94a3b8; font-size: 0.85rem;">{{ a.message }}</p>
+                        </td>
+                        <td>
+                            {% if a.is_published %}
+                                <span class="badge badge-success">Live</span>
+                            {% else %}
+                                <span class="badge badge-secondary">Hidden</span>
+                            {% endif %}
+                        </td>
+                        <td style="font-size: 0.82rem;">{{ a.published_at|ist_datetime }}</td>
+                        <td>
+                            <div style="display: flex; gap: 0.4rem;">
+                                <form method="POST" action="{{ url_for('admin.announcements') }}">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <input type="hidden" name="action" value="toggle">
+                                    <input type="hidden" name="announcement_id" value="{{ a.id }}">
+                                    <button type="submit" class="btn btn-sm btn-outline">
+                                        {% if a.is_published %}Hide{% else %}Show{% endif %}
+                                    </button>
+                                </form>
+                                <form method="POST" action="{{ url_for('admin.announcements') }}" onsubmit="return confirm('Delete this announcement?');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="announcement_id" value="{{ a.id }}">
+                                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: #94a3b8; padding: 2rem;">No announcements created.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

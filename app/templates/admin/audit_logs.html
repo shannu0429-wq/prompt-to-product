@@ -1,0 +1,71 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Audit Logs{% endblock %}
+{% block page_title %}Security &amp; Administrative Audit Logs{% endblock %}
+
+{% block admin_content %}
+<div class="table-card">
+    <div class="table-header">
+        <h3 class="table-title">Audit Trail (Total: {{ pagination.total }})</h3>
+    </div>
+
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Log ID</th>
+                    <th>Action</th>
+                    <th>Actor ID</th>
+                    <th>Entity Type</th>
+                    <th>Entity ID</th>
+                    <th>Metadata</th>
+                    <th>Timestamp</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td style="color: var(--text-muted); font-family: 'JetBrains Mono', monospace;">#{{ log.id }}</td>
+                    <td>
+                        <span style="color: #38bdf8; font-weight: 600;">{{ log.action }}</span>
+                    </td>
+                    <td>
+                        {% if log.actor %}
+                            <span style="color: #ffffff;">{{ log.actor.full_name }}</span><br>
+                            <span style="font-size: 0.72rem; color: #94a3b8;">{{ log.actor.email }}</span>
+                        {% else %}
+                            <span style="color: #64748b;">System / User #{{ log.actor_user_id or '—' }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ log.entity_type }}</td>
+                    <td style="font-family: 'JetBrains Mono', monospace; color: var(--gold);">{{ log.entity_id or '—' }}</td>
+                    <td style="font-size: 0.75rem; color: #cbd5e1; max-width: 250px; word-break: break-all;">
+                        {{ log.metadata_json or '—' }}
+                    </td>
+                    <td style="font-size: 0.82rem;">{{ log.created_at|ist_datetime }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" style="text-align: center; color: #94a3b8; padding: 2rem;">No audit logs recorded yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if pagination.pages > 1 %}
+    <ul class="pagination">
+        {% for p in pagination.iter_pages(left_edge=2, right_edge=2, left_current=2, right_current=2) %}
+            {% if p %}
+                <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('admin.audit_logs', page=p) }}">{{ p }}</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+    {% endif %}
+</div>
+{% endblock %}

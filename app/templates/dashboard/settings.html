@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Account Settings | {{ team.team_name }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 3rem; padding-bottom: 5rem;">
+    <div style="max-width: 650px; margin: 0 auto;">
+
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <div>
+                <h1 style="font-size: 2rem; color: #ffffff; margin: 0;">Account Settings</h1>
+                <p style="color: var(--text-secondary); margin: 0.25rem 0 0;">Manage your security and team profile</p>
+            </div>
+            <a href="{{ url_for('dashboard.index') }}" class="btn btn-sm btn-outline">&larr; Back to Dashboard</a>
+        </div>
+
+        <!-- Team Details Card -->
+        <div class="card" style="margin-bottom: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                <h3 style="font-size: 1.2rem; color: #ffffff; margin: 0;">Team Profile</h3>
+                {% if team.allow_edit %}
+                    <span class="badge badge-success">Editing Permitted by Admin</span>
+                {% else %}
+                    <span class="badge badge-secondary">Editing Locked</span>
+                {% endif %}
+            </div>
+
+            <form method="POST" action="{{ url_for('dashboard.settings') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="action" value="edit_team">
+
+                <div class="form-group">
+                    <label class="form-label">Team Name</label>
+                    <input 
+                        type="text" 
+                        name="team_name" 
+                        class="form-control" 
+                        value="{{ team.team_name }}" 
+                        {% if not team.allow_edit %}readonly style="background: rgba(0,0,0,0.3); color: #cbd5e1;"{% endif %}
+                        required
+                    >
+                    {% if not team.allow_edit %}
+                        <div class="form-help">
+                            Team name changes are locked. If you need corrections, please contact support.
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Registration ID</label>
+                        <input type="text" class="form-control" value="{{ team.registration_id }}" readonly style="background: rgba(0,0,0,0.3); color: var(--gold); font-family: 'JetBrains Mono', monospace;">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Team Size</label>
+                        <input type="text" class="form-control" value="{{ team.team_size }} member(s)" readonly style="background: rgba(0,0,0,0.3); color: #cbd5e1;">
+                    </div>
+                </div>
+
+                {% if team.allow_edit %}
+                    <button type="submit" class="btn btn-primary" style="margin-top: 0.5rem;">
+                        Save Team Changes
+                    </button>
+                {% endif %}
+            </form>
+        </div>
+
+        <!-- Change Password Card -->
+        <div class="card">
+            <h3 style="font-size: 1.2rem; color: #ffffff; margin-bottom: 1.25rem;">Change Password</h3>
+
+            <form method="POST" action="{{ url_for('dashboard.settings') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="action" value="change_password">
+
+                <div class="form-group">
+                    <label class="form-label" for="old_password">Current Password <span class="required">*</span></label>
+                    <input type="password" id="old_password" name="old_password" class="form-control" placeholder="••••••••" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="new_password">New Password <span class="required">*</span></label>
+                        <input type="password" id="new_password" name="new_password" class="form-control" placeholder="Min 8 characters" minlength="8" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="confirm_new_password">Confirm New Password <span class="required">*</span></label>
+                        <input type="password" id="confirm_new_password" name="confirm_new_password" class="form-control" placeholder="Re-enter new password" minlength="8" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-outline" style="border-color: var(--primary-light); color: #ffffff; margin-top: 0.5rem;">
+                    Update Account Password
+                </button>
+            </form>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

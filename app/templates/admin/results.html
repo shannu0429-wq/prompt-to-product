@@ -1,0 +1,105 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Results & Winners{% endblock %}
+{% block page_title %}Challenge Results &amp; Final Rankings{% endblock %}
+
+{% block admin_content %}
+<div style="max-width: 950px;">
+
+    <!-- Publication Status Banner -->
+    <div class="card" style="margin-bottom: 2rem; border-left: 4px solid {% if results_published %}var(--success){% else %}var(--warning){% endif %};">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <span style="font-size: 0.8rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Public Publication Status</span>
+                {% if results_published %}
+                    <h3 style="color: #34d399; margin: 0.25rem 0;">RESULTS ARE PUBLICLY PUBLISHED</h3>
+                    <p style="color: #cbd5e1; font-size: 0.85rem; margin: 0;">Visitors and participants can view winners and rankings on the homepage.</p>
+                {% else %}
+                    <h3 style="color: #f59e0b; margin: 0.25rem 0;">RESULTS ARE WITHHELD (HIDDEN)</h3>
+                    <p style="color: #cbd5e1; font-size: 0.85rem; margin: 0;">The public results section is hidden until you choose to publish.</p>
+                {% endif %}
+            </div>
+
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                <!-- Recalculate rankings -->
+                <form method="POST" action="{{ url_for('admin.results') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="action" value="calculate_rankings">
+                    <button type="submit" class="btn btn-outline">
+                        🔄 Recalculate Rankings
+                    </button>
+                </form>
+
+                <!-- Toggle publish -->
+                <form method="POST" action="{{ url_for('admin.results') }}" onsubmit="return confirm('Confirm updating public publication status of winners?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="action" value="toggle_publish">
+                    <button type="submit" class="btn {% if results_published %}btn-danger{% else %}btn-gold{% endif %}">
+                        {% if results_published %}Withhold Results (Unpublish){% else %}Publish Results Publicly &rarr;{% endif %}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Official Rankings Table -->
+    <div class="table-card">
+        <div class="table-header">
+            <h3 class="table-title">Final Challenge Rankings ({{ results|length }} teams)</h3>
+        </div>
+
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Award &bull; Recognition</th>
+                        <th>Team Name</th>
+                        <th>Team Leader</th>
+                        <th>Score (/60)</th>
+                        <th>Project Website</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in results %}
+                    <tr {% if r.is_top_three %}style="background: rgba(212, 163, 75, 0.06);"{% endif %}>
+                        <td style="font-size: 1.15rem; font-weight: 800;">
+                            {% if r.rank == 1 %}🥇 #1
+                            {% elif r.rank == 2 %}🥈 #2
+                            {% elif r.rank == 3 %}🥉 #3
+                            {% else %}#{{ r.rank }}{% endif %}
+                        </td>
+                        <td>
+                            {% if r.special_award %}
+                                <strong style="color: var(--gold);">{{ r.special_award }}</strong>
+                            {% else %}
+                                <span style="color: #94a3b8;">Eligible Participant</span>
+                            {% endif %}
+                        </td>
+                        <td style="font-weight: 700; color: #ffffff;">{{ r.team.team_name }}</td>
+                        <td>{{ r.team.leader.full_name }}<br><span style="font-size: 0.75rem; color: #94a3b8;">{{ r.team.leader.college }}</span></td>
+                        <td style="font-size: 1.1rem; font-weight: 700; color: #34d399;">
+                            {{ r.team.submission.evaluation.total_score if r.team.submission and r.team.submission.evaluation else '—' }}
+                        </td>
+                        <td>
+                            {% if r.team.submission %}
+                            <a href="{{ r.team.submission.website_url }}" target="_blank" rel="noopener noreferrer" style="color: var(--accent-cyan); font-size: 0.85rem;">
+                                Open Website &UpperRightArrow;
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: #94a3b8; padding: 2rem;">
+                            No rankings calculated yet. Finalize your evaluations first, then click "Recalculate Rankings" above.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Logo & Branding{% endblock %}
+{% block page_title %}Logo &amp; Visual Branding Manager{% endblock %}
+
+{% block admin_content %}
+<div style="max-width: 950px;">
+
+    <!-- Active Logo Preview Banner -->
+    <div class="card" style="margin-bottom: 2rem; border-left: 4px solid var(--gold);">
+        <h3 style="color: #ffffff; margin-bottom: 1rem;">Currently Active Official Event Logo</h3>
+        <div style="display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;">
+            <div style="background: rgba(0,0,0,0.4); padding: 1rem; border-radius: 12px; border: 1px solid var(--border-color); text-align: center;">
+                <img src="{{ current_logo }}" alt="Active Logo" style="max-height: 120px; max-width: 240px; object-fit: contain; border-radius: 8px;">
+            </div>
+            <div>
+                <span class="badge badge-gold" style="margin-bottom: 0.5rem;">Active on Public Website &amp; Portal</span>
+                <p style="font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; color: #38bdf8; margin: 0.25rem 0;">
+                    Path: {{ current_logo }}
+                </p>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;">
+                    Used in Navbar, Registration Success, Dashboard, Admin Header, and Favicon.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Available Logo Files Selection -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <h3 style="color: #ffffff; margin-bottom: 0.5rem;">Available Logo Files in Application</h3>
+        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;">
+            Select any uploaded logo file below to immediately apply it across the website.
+        </p>
+
+        <form method="POST" action="{{ url_for('admin.branding') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="select_logo">
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem;">
+                {% for logo in available_logos %}
+                <label style="cursor: pointer;">
+                    <div class="card" style="padding: 1rem; text-align: center; border: 2px solid {% if current_logo == logo.url %}var(--primary-light){% else %}var(--border-color){% endif %}; height: 100%; display: flex; flex-direction: column; justify-content: space-between;">
+                        <div style="height: 100px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); border-radius: 8px; margin-bottom: 0.75rem; padding: 0.5rem;">
+                            <img src="{{ logo.url }}" alt="{{ logo.filename }}" style="max-height: 80px; max-width: 100%; object-fit: contain;">
+                        </div>
+                        <div>
+                            <input type="radio" name="selected_logo" value="{{ logo.url }}" {% if current_logo == logo.url %}checked{% endif %} style="accent-color: var(--primary);">
+                            <div style="font-size: 0.82rem; font-weight: 600; color: #ffffff; word-break: break-all; margin-top: 0.25rem;">
+                                {{ logo.filename }}
+                            </div>
+                            <div style="font-size: 0.75rem; color: var(--text-muted);">
+                                {{ (logo.size_bytes / 1024)|round(1) }} KB
+                            </div>
+                        </div>
+                    </div>
+                </label>
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                Set Selected as Active Logo
+            </button>
+        </form>
+    </div>
+
+    <!-- Upload Custom Logo -->
+    <div class="card">
+        <h3 style="color: #ffffff; margin-bottom: 0.5rem;">Upload New Logo File</h3>
+        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.25rem;">
+            Upload an updated logo image. Supported formats: PNG, JPG, JPEG, SVG, WEBP.
+        </p>
+
+        <form method="POST" action="{{ url_for('admin.branding') }}" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="upload_logo">
+
+            <div class="form-group">
+                <input type="file" name="logo_file" class="form-control" accept="image/png,image/jpeg,image/svg+xml,image/webp" required>
+            </div>
+
+            <button type="submit" class="btn btn-outline" style="border-color: var(--gold); color: var(--gold);">
+                Upload &amp; Activate Logo
+            </button>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

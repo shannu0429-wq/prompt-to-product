@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}About the Challenge | Prompt to Product{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 3rem; padding-bottom: 4rem;">
+    <div style="max-width: 850px; margin: 0 auto;">
+        <div style="text-align: center; margin-bottom: 3rem;">
+            <span class="badge {{ event_status_class }}">{{ event_status_text }}</span>
+            <h1 style="font-size: 2.75rem; margin-top: 1rem;" class="text-gradient">About Prompt to Product</h1>
+            <p class="lead">AI Web Challenge organized by SSRS Group of Companies</p>
+        </div>
+
+        <div class="card" style="margin-bottom: 2rem;">
+            <div style="display: flex; align-items: center; gap: 1.25rem; margin-bottom: 1.5rem;">
+                <img src="{{ active_logo }}" alt="SSRSGC Official Logo" style="height: 70px; width: auto; border-radius: 8px;">
+                <div>
+                    <h2 style="font-size: 1.4rem; color: #ffffff; margin: 0;">SSRS Group of Companies</h2>
+                    <span style="color: var(--gold); font-size: 0.85rem; font-weight: 600;">Official Organizer</span>
+                </div>
+            </div>
+            <p style="color: var(--text-secondary); line-height: 1.8; margin-bottom: 1rem;">
+                <strong>SSRS Group of Companies</strong> is committed to fostering practical technological excellence, nurturing youth capability, and connecting aspiring student engineers with industry-grade software methodologies.
+            </p>
+            <p style="color: var(--text-secondary); line-height: 1.8;">
+                The <strong>Prompt to Product – AI Web Challenge</strong> was conceptualized to test modern software building instincts. With generative AI rapidly redefining web development, knowing how to formulate clear architectural prompts, evaluate AI-generated code, and deploy functional applications in record time has become a superpower.
+            </p>
+        </div>
+
+        <div class="card" style="margin-bottom: 2rem;">
+            <h3 style="color: #38bdf8; margin-bottom: 1rem;">Challenge Summary</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                <div>
+                    <p style="margin: 0.5rem 0; color: #94a3b8; font-size: 0.9rem;"><strong>Event Name:</strong> Prompt to Product – AI Web Challenge</p>
+                    <p style="margin: 0.5rem 0; color: #94a3b8; font-size: 0.9rem;"><strong>Organizer:</strong> SSRS Group of Companies</p>
+                    <p style="margin: 0.5rem 0; color: #94a3b8; font-size: 0.9rem;"><strong>Format:</strong> Online Hackathon</p>
+                </div>
+                <div>
+                    <p style="margin: 0.5rem 0; color: #94a3b8; font-size: 0.9rem;"><strong>Team Size:</strong> 1 to 4 Members</p>
+                    <p style="margin: 0.5rem 0; color: #94a3b8; font-size: 0.9rem;"><strong>Domain:</strong> AI &amp; Web Development</p>
+                    <p style="margin: 0.5rem 0; color: #94a3b8; font-size: 0.9rem;"><strong>Submission Type:</strong> Deployed Website URL Only</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 2rem;">
+            <h3 style="color: var(--gold); margin-bottom: 1rem;">Awards &amp; Recognition</h3>
+            <p style="color: var(--text-secondary); line-height: 1.7; margin-bottom: 1rem;">
+                This hackathon focuses on genuine technical merit and institutional recognition. There are <strong>no cash prizes</strong>. Instead, high-achieving teams receive prestigious institutional accolades:
+            </p>
+            <ul style="color: #cbd5e1; line-height: 1.8; padding-left: 20px;">
+                <li><strong>Certificates of Excellence</strong> for the Top 3 ranked teams.</li>
+                <li><strong>Official Participation Certificates</strong> for all verified teams that submit a working deployed application.</li>
+                <li>Special highlight across SSRS Group of Companies media networks.</li>
+            </ul>
+        </div>
+
+        <div style="text-align: center; margin-top: 3rem;">
+            <a href="{{ url_for('registration.register') }}" class="btn btn-lg btn-primary">Register Your Team</a>
+            <a href="{{ url_for('public.problem_statement') }}" class="btn btn-lg btn-outline" style="margin-left: 1rem;">View Problem Statement</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

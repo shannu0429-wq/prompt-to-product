@@ -1,0 +1,74 @@
+{% extends "admin/base.html" %}
+
+{% block title %}WhatsApp & Unstop Links{% endblock %}
+{% block page_title %}Official External Links Configuration{% endblock %}
+
+{% block admin_content %}
+<div class="card" style="max-width: 850px;">
+    <div style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
+        <h3 style="color: #ffffff; margin-bottom: 0.25rem;">Channel Destinations</h3>
+        <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0;">
+            Update official URLs for the WhatsApp community and Unstop opportunity pages. All buttons open in new tabs with safe attributes.
+        </p>
+    </div>
+
+    <form method="POST" action="{{ url_for('admin.external_links') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <!-- WhatsApp Link -->
+        <div class="form-group">
+            <label class="form-label">
+                Official WhatsApp Community URL <span class="required">*</span>
+            </label>
+            <input 
+                type="url" 
+                name="whatsapp_group_url" 
+                class="form-control" 
+                value="{{ settings.whatsapp_group_url }}" 
+                required
+            >
+            <div class="form-help">
+                Default: <code>https://chat.whatsapp.com/F4yqR3OBRnGARB9rV9CF7K</code>
+            </div>
+        </div>
+
+        <!-- Unstop Registration Link -->
+        <div class="form-group">
+            <label class="form-label">
+                Official Unstop Opportunity Registration URL <span class="required">*</span>
+            </label>
+            <input 
+                type="url" 
+                name="unstop_opportunity_url" 
+                class="form-control" 
+                value="{{ settings.unstop_opportunity_url }}" 
+                required
+            >
+            <div class="form-help">
+                Default: <code>https://unstop.com/p/prompt-to-product-ai-web-challenge-ssrs-group-of-companies-1772617</code>
+            </div>
+        </div>
+
+        <!-- Unstop Dedicated Submission Link -->
+        <div class="form-group">
+            <label class="form-label">
+                Official Unstop Submission URL <span class="required">*</span>
+            </label>
+            <input 
+                type="url" 
+                name="unstop_submission_url" 
+                class="form-control" 
+                value="{{ settings.unstop_submission_url }}" 
+                required
+            >
+            <div class="form-help">
+                Initial URL is the opportunity page; can be switched to a dedicated round submission link when available on Unstop.
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">
+            Update Official Links
+        </button>
+    </form>
+</div>
+{% endblock %}

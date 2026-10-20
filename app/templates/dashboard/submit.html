@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Submit Project Website | {{ team.team_name }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 3rem; padding-bottom: 5rem;">
+    <div style="max-width: 680px; margin: 0 auto;">
+
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <span class="badge badge-primary">Submission Channel</span>
+            <h1 style="font-size: 2.25rem; color: #ffffff; margin-top: 0.5rem;">
+                {% if submission %}Update Your Submission{% else %}Submit Deployed Project{% endif %}
+            </h1>
+            <p class="lead">
+                Prompt to Product – AI Web Challenge by SSRS Group of Companies
+            </p>
+        </div>
+
+        {% if not can_submit %}
+        <div class="card" style="border-left: 4px solid var(--danger); margin-bottom: 2rem; background: rgba(239, 68, 68, 0.08);">
+            <h4 style="color: #f87171; margin-bottom: 0.5rem;">Submissions Locked</h4>
+            <p style="color: #cbd5e1; font-size: 0.95rem; margin: 0;">
+                {{ reason }}
+            </p>
+            {% if submission %}
+            <div style="margin-top: 1rem;">
+                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.25rem;">Your current recorded link:</p>
+                <a href="{{ submission.website_url }}" target="_blank" rel="noopener noreferrer" style="color: #38bdf8; font-weight: 600; word-break: break-all;">
+                    {{ submission.website_url }} &UpperRightArrow;
+                </a>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <div class="card" style="border-top: 4px solid var(--primary-light);">
+            <form method="POST" action="{{ url_for('submissions.submit') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <!-- Read-only Team Info -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Team Registration ID</label>
+                        <input type="text" class="form-control" value="{{ team.registration_id }}" readonly style="background: rgba(0,0,0,0.3); color: var(--gold); font-family: 'JetBrains Mono', monospace; font-weight: 700;">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Team Name</label>
+                        <input type="text" class="form-control" value="{{ team.team_name }}" readonly style="background: rgba(0,0,0,0.3); color: #cbd5e1;">
+                    </div>
+                </div>
+
+                <!-- URL input -->
+                <div class="form-group">
+                    <label class="form-label" for="website_url">
+                        Deployed Website URL <span class="required">*</span>
+                    </label>
+                    <input 
+                        type="url" 
+                        id="website_url" 
+                        name="website_url" 
+                        class="form-control" 
+                        placeholder="https://your-deployed-project.com" 
+                        value="{{ submission.website_url if submission else '' }}"
+                        {% if not can_submit %}disabled{% endif %}
+                        required
+                    >
+                    <div class="form-help">
+                        Enter a live, public HTTP or HTTPS web address (e.g., hosted on Vercel, Netlify, Render, Railway, AWS, or GitHub Pages).
+                    </div>
+                </div>
+
+                <!-- Short Project Description -->
+                <div class="form-group">
+                    <label class="form-label" for="project_description">
+                        Short Project Description <span style="color: var(--text-muted); font-size: 0.8rem;">(Optional)</span>
+                    </label>
+                    <textarea 
+                        id="project_description" 
+                        name="project_description" 
+                        class="form-control" 
+                        rows="4" 
+                        placeholder="Briefly describe what your application does, which AI tools or prompts were utilized, and key features to test."
+                        {% if not can_submit %}disabled{% endif %}
+                    >{{ submission.project_description if submission and submission.project_description else '' }}</textarea>
+                </div>
+
+                <!-- Submission Guidelines Reminder -->
+                <div style="background: rgba(245, 158, 11, 0.1); border-left: 3px solid #f59e0b; padding: 0.85rem 1rem; border-radius: 6px; margin: 1.5rem 0;">
+                    <p style="margin: 0; font-size: 0.85rem; color: #fde68a; line-height: 1.6;">
+                        <strong>Submission Rule:</strong> This portal accepts <strong>only public deployed website links</strong>. Do not attempt to upload ZIP files, PDF documents, or video files.
+                    </p>
+                </div>
+
+                <!-- Action Buttons -->
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <button type="submit" class="btn btn-primary" style="flex: 1;" {% if not can_submit %}disabled{% endif %}>
+                        {% if submission %}Update Project Link{% else %}Save &amp; Submit Project{% endif %}
+                    </button>
+                    <a href="{{ url_for('dashboard.index') }}" class="btn btn-outline">Cancel</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Separate Unstop Submission Callout -->
+        <div class="card" style="margin-top: 2rem; background: rgba(0, 118, 254, 0.08); border-color: rgba(0, 118, 254, 0.25);">
+            <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                <span style="font-size: 1.75rem;">📋</span>
+                <div>
+                    <h4 style="margin: 0 0 0.25rem; color: #60a5fa;">Submit on Unstop (Required)</h4>
+                    <p style="margin: 0 0 1rem; font-size: 0.88rem; color: #cbd5e1; line-height: 1.6;">
+                        The website submission and the Unstop submission are two distinct actions. 
+                        Completing this form records your deployed link in our evaluation database. 
+                        You must also complete the submission on Unstop before the deadline.
+                    </p>
+                    <a href="{{ unstop_sub_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-unstop">
+                        Submit on Unstop &UpperRightArrow;
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

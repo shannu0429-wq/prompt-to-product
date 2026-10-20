@@ -1,0 +1,67 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Website Editor{% endblock %}
+{% block page_title %}Website Content Editor{% endblock %}
+
+{% block admin_content %}
+<div class="card" style="max-width: 900px;">
+    <div style="margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
+        <h3 style="color: #ffffff; margin-bottom: 0.25rem;">Global Copy &amp; Metadata</h3>
+        <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0;">
+            Update public text, hero headers, and organizer details directly in MySQL without redeploying code.
+        </p>
+    </div>
+
+    <form method="POST" action="{{ url_for('admin.editor') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="form-group">
+            <label class="form-label">Event Title <span class="required">*</span></label>
+            <input type="text" name="event_title" class="form-control" value="{{ settings.event_title }}" required>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Event Subtitle / Tagline <span class="required">*</span></label>
+            <input type="text" name="event_subtitle" class="form-control" value="{{ settings.event_subtitle }}" required>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Event Description <span class="required">*</span></label>
+            <textarea name="event_description" class="form-control" rows="3" required>{{ settings.event_description }}</textarea>
+            <div class="form-help">Displayed prominently on the public homepage hero section.</div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Organizer Name <span class="required">*</span></label>
+                <input type="text" name="organizer_name" class="form-control" value="{{ settings.organizer_name }}" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Organizer Tagline</label>
+                <input type="text" name="organizer_tagline" class="form-control" value="{{ settings.organizer_tagline }}">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Public Contact Email <span class="required">*</span></label>
+                <input type="email" name="contact_email" class="form-control" value="{{ settings.contact_email }}" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Public Support Phone</label>
+                <input type="text" name="contact_phone" class="form-control" value="{{ settings.contact_phone }}">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Submission Confirmation Text</label>
+            <textarea name="submission_confirmation_text" class="form-control" rows="2">{{ settings.submission_confirmation_text }}</textarea>
+            <div class="form-help">Message displayed on the participant's post-submission screen.</div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">
+            Save &amp; Publish Website Changes
+        </button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,208 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Team Details | {{ team.team_name }}{% endblock %}
+{% block page_title %}Team Details &bull; {{ team.registration_id }}{% endblock %}
+
+{% block admin_content %}
+<div style="max-width: 950px;">
+
+    <!-- Top summary bar -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h1 style="font-size: 2rem; color: #ffffff; margin: 0;">{{ team.team_name }}</h1>
+            <span style="font-family: 'JetBrains Mono', monospace; color: var(--gold); font-size: 1.1rem; font-weight: 700;">
+                {{ team.registration_id }}
+            </span>
+        </div>
+        <a href="{{ url_for('admin.registrations') }}" class="btn btn-outline">&larr; Back to Teams List</a>
+    </div>
+
+    <!-- Quick Administrative Controls Card -->
+    <div class="card" style="margin-bottom: 2rem; border-top: 3px solid var(--primary-light);">
+        <h3 style="color: #ffffff; font-size: 1.2rem; margin-bottom: 1.25rem;">Administrative Controls</h3>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+            <!-- Status Changer -->
+            <form method="POST" action="{{ url_for('admin.team_detail', team_id=team.id) }}" style="background: rgba(0,0,0,0.25); padding: 1.25rem; border-radius: 8px;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="action" value="update_status">
+                <label class="form-label">Registration Status</label>
+                <div style="display: flex; gap: 0.5rem;">
+                    <select name="registration_status" class="form-control">
+                        <option value="registered" {% if team.registration_status == 'registered' %}selected{% endif %}>Registered</option>
+                        <option value="verified" {% if team.registration_status == 'verified' %}selected{% endif %}>Verified</option>
+                        <option value="under_review" {% if team.registration_status == 'under_review' %}selected{% endif %}>Under Review</option>
+                        <option value="suspended" {% if team.registration_status == 'suspended' %}selected{% endif %}>Suspended</option>
+                    </select>
+                    <button type="submit" class="btn btn-sm btn-primary">Update</button>
+                </div>
+            </form>
+
+            <!-- Individual Permission Toggles -->
+            <div style="background: rgba(0,0,0,0.25); padding: 1.25rem; border-radius: 8px; display: flex; flex-direction: column; gap: 0.75rem;">
+                <label class="form-label">Special Individual Team Permissions</label>
+                
+                <form method="POST" action="{{ url_for('admin.team_detail', team_id=team.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="action" value="toggle_edit_permission">
+                    <button type="submit" class="btn btn-sm {% if team.allow_edit %}btn-warning{% else %}btn-outline{% endif %}" style="width: 100%;">
+                        {% if team.allow_edit %}Revoke Profile Edit Permission{% else %}Allow Team Profile Edit{% endif %}
+                    </button>
+                </form>
+
+                <form method="POST" action="{{ url_for('admin.team_detail', team_id=team.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="action" value="toggle_resubmit_permission">
+                    <button type="submit" class="btn btn-sm {% if team.allow_resubmit %}btn-warning{% else %}btn-outline{% endif %}" style="width: 100%;">
+                        {% if team.allow_resubmit %}Revoke Resubmission Permission{% else %}Allow One-Time Resubmission{% endif %}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Members Grid -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <h3 style="color: #ffffff; font-size: 1.2rem; margin-bottom: 1.25rem;">Team Members ({{ team.members|length }})</h3>
+        
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            {% for m in team.members %}
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <strong style="color: #ffffff; font-size: 1.05rem;">{{ m.full_name }}</strong>
+                        {% if m.is_leader %}
+                            <span class="badge badge-primary">Leader</span>
+                        {% else %}
+                            <span class="badge badge-secondary">Member</span>
+                        {% endif %}
+                    </div>
+                    <div style="color: #94a3b8; font-size: 0.88rem; margin-top: 0.25rem;">
+                        Email: <a href="mailto:{{ m.email }}" style="color: #38bdf8;">{{ m.email }}</a> &bull; Phone: {{ m.phone }}
+                    </div>
+                </div>
+                <div style="text-align: right; color: #cbd5e1; font-size: 0.9rem;">
+                    {{ m.college }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Project Submission Info (if submitted) -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <h3 style="color: #ffffff; font-size: 1.2rem; margin-bottom: 1rem;">Submission Details</h3>
+        
+        {% if team.submission %}
+            <div style="background: rgba(0,0,0,0.25); padding: 1.25rem; border-radius: 8px; margin-bottom: 1rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span style="color: #94a3b8;">Submission ID:</span>
+                    <strong style="color: #38bdf8; font-family: 'JetBrains Mono', monospace;">{{ team.submission.submission_id }}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span style="color: #94a3b8;">Status:</span>
+                    <span class="badge badge-success">{{ team.submission.status }}</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <span style="color: #94a3b8;">Submitted At:</span>
+                    <span style="color: #cbd5e1;">{{ team.submission.submitted_at|ist_datetime }}</span>
+                </div>
+                <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid var(--border-color);">
+                    <span style="color: #94a3b8; display: block; margin-bottom: 0.25rem;">Deployed Website Link:</span>
+                    <a href="{{ team.submission.website_url }}" target="_blank" rel="noopener noreferrer" style="color: var(--accent-cyan); font-weight: 600; word-break: break-all;">
+                        {{ team.submission.website_url }} &UpperRightArrow;
+                    </a>
+                </div>
+                {% if team.submission.project_description %}
+                <div style="margin-top: 0.75rem;">
+                    <span style="color: #94a3b8; display: block; margin-bottom: 0.25rem;">Description:</span>
+                    <p style="color: #cbd5e1; font-size: 0.9rem; margin: 0;">{{ team.submission.project_description }}</p>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if team.submission.evaluation %}
+            <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); padding: 1rem; border-radius: 8px;">
+                <strong style="color: #34d399;">Evaluation Score:</strong> {{ team.submission.evaluation.total_score }} / 60
+                {% if team.submission.evaluation.is_finalized %}
+                    <span class="badge badge-success" style="margin-left: 0.5rem;">Finalized</span>
+                {% else %}
+                    <span class="badge badge-warning" style="margin-left: 0.5rem;">Draft</span>
+                {% endif %}
+            </div>
+            {% endif %}
+
+        {% else %}
+            <p style="color: #94a3b8; margin: 0;">No project has been submitted yet by this team.</p>
+        {% endif %}
+    </div>
+
+    <!-- Internal Administrative Notes Form -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <h3 style="color: #ffffff; font-size: 1.2rem; margin-bottom: 0.75rem;">Internal Admin Notes</h3>
+        <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">
+            Private remarks visible only to administrators.
+        </p>
+
+        <form method="POST" action="{{ url_for('admin.team_detail', team_id=team.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="save_notes">
+            <div class="form-group">
+                <textarea name="internal_notes" class="form-control" rows="3" placeholder="Enter administrative observations, verification notes, or remarks...">{{ team.internal_notes or '' }}</textarea>
+            </div>
+            <button type="submit" class="btn btn-sm btn-primary">Save Notes</button>
+        </form>
+    </div>
+
+    <!-- Edit Team Info (Fix typos) -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <h3 style="color: #ffffff; font-size: 1.2rem; margin-bottom: 1rem;">Correct Registration Errors</h3>
+        
+        <form method="POST" action="{{ url_for('admin.team_detail', team_id=team.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="edit_team_info">
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Team Name</label>
+                    <input type="text" name="team_name" class="form-control" value="{{ team.team_name }}" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Leader Full Name</label>
+                    <input type="text" name="leader_name" class="form-control" value="{{ team.leader.full_name }}" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Leader Phone</label>
+                    <input type="tel" name="leader_phone" class="form-control" value="{{ team.leader.phone }}" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Leader College</label>
+                    <input type="text" name="leader_college" class="form-control" value="{{ team.leader.college }}" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-sm btn-outline">Update Information</button>
+        </form>
+    </div>
+
+    <!-- Super Admin: Permanent Deletion -->
+    {% if current_user.is_super_admin %}
+    <div class="card" style="border: 1px solid rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.05);">
+        <h4 style="color: #f87171; margin-bottom: 0.5rem;">Danger Zone: Permanent Team Deletion</h4>
+        <p style="color: #cbd5e1; font-size: 0.88rem; margin-bottom: 1rem;">
+            Permanently delete this team, its members, and associated submission records from MySQL. This action is irreversible.
+        </p>
+
+        <form method="POST" action="{{ url_for('admin.team_detail', team_id=team.id) }}" onsubmit="return confirm('WARNING: Are you absolutely certain you want to permanently delete this team?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="delete_team">
+            <button type="submit" class="btn btn-sm btn-danger">Permanently Delete Team</button>
+        </form>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

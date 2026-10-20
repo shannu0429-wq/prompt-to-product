@@ -1,0 +1,74 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Email Notifications{% endblock %}
+{% block page_title %}Email Notifications &amp; SMTP Diagnostics{% endblock %}
+
+{% block admin_content %}
+<div style="max-width: 800px;">
+
+    <!-- SMTP Configuration Card -->
+    <div class="card" style="margin-bottom: 2rem; border-left: 4px solid {% if is_configured %}var(--success){% else %}var(--warning){% endif %};">
+        <h3 style="color: #ffffff; font-size: 1.2rem; margin-bottom: 0.5rem;">SMTP Service Status</h3>
+        <p style="color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 1.25rem;">
+            Email credentials are loaded strictly from environment variables (<code>.env</code>). Passwords and credentials are never exposed in administrative views.
+        </p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; background: rgba(0,0,0,0.25); padding: 1.25rem; border-radius: 8px; font-size: 0.9rem;">
+            <div>
+                <span style="color: #94a3b8;">Status:</span>
+                {% if is_configured %}
+                    <span class="badge badge-success" style="margin-left: 0.5rem;">Configured</span>
+                {% else %}
+                    <span class="badge badge-warning" style="margin-left: 0.5rem;">Simulation Mode</span>
+                {% endif %}
+            </div>
+            <div>
+                <span style="color: #94a3b8;">Server:</span>
+                <strong style="color: #ffffff; margin-left: 0.5rem;">{{ server or 'Not set' }}</strong>
+            </div>
+            <div>
+                <span style="color: #94a3b8;">Port:</span>
+                <strong style="color: #ffffff; margin-left: 0.5rem;">{{ port or 'Not set' }}</strong>
+            </div>
+            <div>
+                <span style="color: #94a3b8;">Sender Username:</span>
+                <strong style="color: #ffffff; margin-left: 0.5rem;">{{ username or '(empty)' }}</strong>
+            </div>
+            <div>
+                <span style="color: #94a3b8;">TLS Encryption:</span>
+                <strong style="color: #ffffff; margin-left: 0.5rem;">{{ 'Enabled' if tls else 'Disabled' }}</strong>
+            </div>
+        </div>
+
+        {% if not is_configured %}
+        <div style="margin-top: 1rem; padding: 0.85rem; background: rgba(245, 158, 11, 0.1); border-radius: 6px; border-left: 3px solid #f59e0b;">
+            <p style="margin: 0; font-size: 0.82rem; color: #fde68a;">
+                <strong>Note:</strong> When <code>MAIL_USERNAME</code> is empty, registration and submission confirmation emails are safely simulated in logging without raising runtime errors.
+            </p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Test Dispatch Form -->
+    <div class="card">
+        <h3 style="color: #ffffff; font-size: 1.2rem; margin-bottom: 0.5rem;">Send Diagnostic Test Email</h3>
+        <p style="color: var(--text-secondary); font-size: 0.88rem; margin-bottom: 1.25rem;">
+            Dispatch a test email to verify your SMTP delivery.
+        </p>
+
+        <form method="POST" action="{{ url_for('admin.email_notifications') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-group">
+                <label class="form-label">Recipient Email Address <span class="required">*</span></label>
+                <input type="email" name="test_recipient" class="form-control" placeholder="your_email@gmail.com" required>
+            </div>
+
+            <button type="submit" class="btn btn-outline" style="border-color: #38bdf8; color: #38bdf8;">
+                Dispatch Test Message
+            </button>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

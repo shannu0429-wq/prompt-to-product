@@ -1,0 +1,138 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Submissions Management{% endblock %}
+{% block page_title %}Website Link Submissions Management{% endblock %}
+
+{% block admin_content %}
+
+<!-- Filter & Export Bar -->
+<div class="card" style="margin-bottom: 2rem;">
+    <form method="GET" action="{{ url_for('admin.submissions') }}" style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
+        <div style="flex: 2; min-width: 250px;">
+            <label class="form-label">Search Submissions</label>
+            <input type="text" name="q" class="form-control" placeholder="Search by submission ID, team name, URL..." value="{{ search }}">
+        </div>
+
+        <div style="flex: 1; min-width: 180px;">
+            <label class="form-label">Status Filter</label>
+            <select name="status" class="form-control">
+                <option value="">All Statuses</option>
+                <option value="submitted" {% if status_filter == 'submitted' %}selected{% endif %}>Submitted</option>
+                <option value="under_review" {% if status_filter == 'under_review' %}selected{% endif %}>Under Review</option>
+                <option value="shortlisted" {% if status_filter == 'shortlisted' %}selected{% endif %}>Shortlisted</option>
+                <option value="rejected" {% if status_filter == 'rejected' %}selected{% endif %}>Rejected</option>
+            </select>
+        </div>
+
+        <div style="display: flex; gap: 0.5rem;">
+            <button type="submit" class="btn btn-primary">Filter</button>
+            <a href="{{ url_for('admin.submissions') }}" class="btn btn-outline">Reset</a>
+            <a href="{{ url_for('admin.export_submissions') }}" class="btn btn-gold" style="white-space: nowrap;">
+                📥 Export CSV
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Submissions Table -->
+<div class="table-card">
+    <div class="table-header">
+        <h3 class="table-title">Submitted Projects (Total: {{ pagination.total }})</h3>
+    </div>
+
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Sub ID</th>
+                    <th>Team</th>
+                    <th>Deployed Website URL</th>
+                    <th>Status</th>
+                    <th>Score (/60)</th>
+                    <th>Submitted At</th>
+                    <th>Manage Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in submissions %}
+                <tr>
+                    <td>
+                        <strong style="color: #38bdf8; font-family: 'JetBrains Mono', monospace;">{{ s.submission_id }}</strong>
+                    </td>
+                    <td>
+                        <strong style="color: #ffffff;">{{ s.team.team_name }}</strong><br>
+                        <span style="font-size: 0.75rem; color: var(--gold); font-family: 'JetBrains Mono', monospace;">{{ s.team.registration_id }}</span>
+                    </td>
+                    <td>
+                        <a href="{{ s.website_url }}" target="_blank" rel="noopener noreferrer" style="color: var(--accent-cyan); font-weight: 600; word-break: break-all;">
+                            {{ s.website_url }} &UpperRightArrow;
+                        </a>
+                        {% if s.project_description %}
+                        <div style="font-size: 0.78rem; color: #94a3b8; margin-top: 0.25rem;">
+                            {{ s.project_description[:80] }}...
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if s.status == 'submitted' %}
+                            <span class="badge badge-primary">Submitted</span>
+                        {% elif s.status == 'under_review' %}
+                            <span class="badge badge-warning">Under Review</span>
+                        {% elif s.status == 'shortlisted' %}
+                            <span class="badge badge-success">Shortlisted</span>
+                        {% elif s.status == 'rejected' %}
+                            <span class="badge badge-danger">Rejected</span>
+                        {% else %}
+                            <span class="badge badge-secondary">{{ s.status }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if s.evaluation %}
+                            <strong style="color: #34d399;">{{ s.evaluation.total_score }}</strong>
+                        {% else %}
+                            <span style="color: #64748b;">Not Scored</span>
+                        {% endif %}
+                    </td>
+                    <td style="font-size: 0.8rem;">{{ s.submitted_at|ist_datetime }}</td>
+                    <td>
+                        <!-- Quick Status Form -->
+                        <form method="POST" action="{{ url_for('admin.submissions') }}" style="display: flex; gap: 0.4rem; align-items: center;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="action" value="update_status">
+                            <input type="hidden" name="submission_id" value="{{ s.id }}">
+                            <select name="status" class="form-control" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; width: 110px;">
+                                <option value="submitted" {% if s.status == 'submitted' %}selected{% endif %}>Submitted</option>
+                                <option value="under_review" {% if s.status == 'under_review' %}selected{% endif %}>Reviewing</option>
+                                <option value="shortlisted" {% if s.status == 'shortlisted' %}selected{% endif %}>Shortlist</option>
+                                <option value="rejected" {% if s.status == 'rejected' %}selected{% endif %}>Reject</option>
+                            </select>
+                            <button type="submit" class="btn btn-sm btn-outline" style="padding: 0.25rem 0.5rem;">Save</button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" style="text-align: center; color: #94a3b8; padding: 2rem;">No submissions found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if pagination.pages > 1 %}
+    <ul class="pagination">
+        {% for p in pagination.iter_pages(left_edge=2, right_edge=2, left_current=2, right_current=2) %}
+            {% if p %}
+                <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('admin.submissions', page=p, q=search, status=status_filter) }}">{{ p }}</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+    {% endif %}
+</div>
+
+{% endblock %}

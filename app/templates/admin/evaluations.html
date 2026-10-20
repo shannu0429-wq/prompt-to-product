@@ -1,0 +1,150 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Evaluation & Rankings{% endblock %}
+{% block page_title %}Project Evaluation &amp; Scoring Panel{% endblock %}
+
+{% block admin_content %}
+<div style="max-width: 1050px;">
+
+    <!-- Instructions banner -->
+    <div class="card" style="margin-bottom: 2rem; border-left: 4px solid var(--accent-cyan);">
+        <h3 style="color: #ffffff; font-size: 1.15rem; margin-bottom: 0.5rem;">Evaluation Rubric (60 Marks Total)</h3>
+        <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0; line-height: 1.6;">
+            Score each submitted application out of 10 across the six official dimensions:
+            <strong>Functionality</strong> (10), <strong>Innovation</strong> (10), <strong>Prompt Engineering</strong> (10),
+            <strong>UI/UX Design</strong> (10), <strong>Real-World Impact</strong> (10), and <strong>Code Quality</strong> (10).
+            Scores can be saved as Drafts or Finalized.
+        </p>
+    </div>
+
+    <!-- Submissions Scoring Form List -->
+    <div class="table-card" style="margin-bottom: 2.5rem;">
+        <div class="table-header">
+            <h3 class="table-title">Submissions to Evaluate ({{ submissions|length }})</h3>
+        </div>
+
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Team &amp; URL</th>
+                        <th>Func (10)</th>
+                        <th>Innov (10)</th>
+                        <th>Prompt (10)</th>
+                        <th>UI/UX (10)</th>
+                        <th>Impact (10)</th>
+                        <th>Code (10)</th>
+                        <th>Total (/60)</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in submissions %}
+                    {% set ev = s.evaluation %}
+                    <tr>
+                        <form method="POST" action="{{ url_for('admin.evaluations') }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="submission_id" value="{{ s.id }}">
+                            
+                            <td style="min-width: 200px;">
+                                <strong style="color: #ffffff;">{{ s.team.team_name }}</strong><br>
+                                <a href="{{ s.website_url }}" target="_blank" rel="noopener noreferrer" style="color: var(--accent-cyan); font-size: 0.8rem; word-break: break-all;">
+                                    {{ s.website_url }} &UpperRightArrow;
+                                </a>
+                                {% if ev and ev.is_finalized %}
+                                    <div style="margin-top: 0.25rem;"><span class="badge badge-success" style="font-size: 0.65rem;">Finalized</span></div>
+                                {% endif %}
+                            </td>
+                            <td><input type="number" step="0.5" min="0" max="10" name="score_functionality" class="score-input" value="{{ ev.score_functionality if ev else 0 }}"></td>
+                            <td><input type="number" step="0.5" min="0" max="10" name="score_innovation" class="score-input" value="{{ ev.score_innovation if ev else 0 }}"></td>
+                            <td><input type="number" step="0.5" min="0" max="10" name="score_prompt_engineering" class="score-input" value="{{ ev.score_prompt_engineering if ev else 0 }}"></td>
+                            <td><input type="number" step="0.5" min="0" max="10" name="score_ui_ux" class="score-input" value="{{ ev.score_ui_ux if ev else 0 }}"></td>
+                            <td><input type="number" step="0.5" min="0" max="10" name="score_real_world_impact" class="score-input" value="{{ ev.score_real_world_impact if ev else 0 }}"></td>
+                            <td><input type="number" step="0.5" min="0" max="10" name="score_code_quality" class="score-input" value="{{ ev.score_code_quality if ev else 0 }}"></td>
+                            
+                            <td style="font-size: 1.1rem; font-weight: 700; color: #34d399;">
+                                {{ ev.total_score if ev else '0.0' }}
+                            </td>
+                            
+                            <td>
+                                <div style="display: flex; gap: 0.35rem;">
+                                    <button type="submit" name="action" value="save_score" class="btn btn-sm btn-outline" title="Save Draft">
+                                        Draft
+                                    </button>
+                                    <button type="submit" name="action" value="finalize_score" class="btn btn-sm btn-primary" title="Finalize Score">
+                                        Finalize
+                                    </button>
+                                </div>
+                            </td>
+                        </form>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="9" style="text-align: center; color: #94a3b8; padding: 2rem;">No submissions available for scoring.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Live Leaderboard of Finalized Scores -->
+    <div class="table-card">
+        <div class="table-header">
+            <div>
+                <h3 class="table-title">Live Finalized Rankings ({{ ranked_subs|length }})</h3>
+                <p style="margin: 0; font-size: 0.82rem; color: #94a3b8;">Computed directly from finalized evaluation scores.</p>
+            </div>
+            <a href="{{ url_for('admin.results') }}" class="btn btn-sm btn-gold">Manage &amp; Publish Results &rarr;</a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Team Name</th>
+                        <th>Leader</th>
+                        <th>Total Score (/60)</th>
+                        <th>Website Link</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sub in ranked_subs %}
+                    <tr {% if loop.index <= 3 %}style="background: rgba(212, 163, 75, 0.05);"{% endif %}>
+                        <td>
+                            {% if loop.index == 1 %}
+                                <strong style="color: #fde047; font-size: 1.1rem;">🥇 #1</strong>
+                            {% elif loop.index == 2 %}
+                                <strong style="color: #e2e8f0; font-size: 1.1rem;">🥈 #2</strong>
+                            {% elif loop.index == 3 %}
+                                <strong style="color: #d97706; font-size: 1.1rem;">🥉 #3</strong>
+                            {% else %}
+                                #{{ loop.index }}
+                            {% endif %}
+                        </td>
+                        <td style="font-weight: 700; color: #ffffff;">{{ sub.team.team_name }}</td>
+                        <td>{{ sub.team.leader.full_name }} ({{ sub.team.leader.college }})</td>
+                        <td style="font-size: 1.15rem; font-weight: 800; color: #34d399;">
+                            {{ sub.evaluation.total_score }}
+                        </td>
+                        <td>
+                            <a href="{{ sub.website_url }}" target="_blank" rel="noopener noreferrer" style="color: var(--accent-cyan);">
+                                View Site &UpperRightArrow;
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #94a3b8; padding: 1.5rem;">
+                            No finalized scores recorded yet. Click "Finalize" on scored submissions above.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

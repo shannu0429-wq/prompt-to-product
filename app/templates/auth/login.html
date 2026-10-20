@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Leader Login | Prompt to Product{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 4rem; padding-bottom: 5rem;">
+    <div style="max-width: 480px; margin: 0 auto;">
+        
+        <div class="card" style="border-top: 4px solid var(--primary-light);">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <img src="{{ active_logo }}" alt="Logo" style="height: 64px; margin-bottom: 1rem; border-radius: 8px;">
+                <h1 style="font-size: 1.75rem; color: #ffffff; margin-bottom: 0.25rem;">Participant Login</h1>
+                <p style="color: var(--text-secondary); font-size: 0.9rem;">
+                    Sign in to manage your team and project submission
+                </p>
+            </div>
+
+            <form method="POST" action="{{ url_for('auth.login', next=request.args.get('next')) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div class="form-group">
+                    <label class="form-label" for="email">Team Leader Email Address <span class="required">*</span></label>
+                    <input type="email" id="email" name="email" class="form-control" placeholder="leader@college.edu" required autofocus>
+                </div>
+
+                <div class="form-group">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                        <label class="form-label" for="password" style="margin: 0;">Password <span class="required">*</span></label>
+                        <a href="{{ url_for('auth.forgot_password') }}" style="font-size: 0.8rem; color: #38bdf8;">Forgot Password?</a>
+                    </div>
+                    <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required>
+                </div>
+
+                <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem;">
+                    <input type="checkbox" id="remember" name="remember" style="accent-color: var(--primary);">
+                    <label for="remember" style="font-size: 0.88rem; color: var(--text-secondary); cursor: pointer; user-select: none;">
+                        Remember my login session for 7 days
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 1rem; padding: 0.75rem;">
+                    Sign In to Dashboard
+                </button>
+            </form>
+
+            <div style="text-align: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); font-size: 0.9rem; color: var(--text-secondary);">
+                Don't have a team account yet? 
+                <a href="{{ url_for('registration.register') }}" style="color: #38bdf8; font-weight: 600;">Register Your Team</a>
+            </div>
+
+            <div style="text-align: center; margin-top: 1rem;">
+                <a href="{{ url_for('auth.admin_login') }}" style="font-size: 0.8rem; color: #64748b;">
+                    Admin Portal Login &rarr;
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

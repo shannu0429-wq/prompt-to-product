@@ -1,0 +1,442 @@
+{% extends "base.html" %}
+
+{% block title %}Prompt to Product – Turn Your Ideas into Intelligent Digital Products{% endblock %}
+
+{% block content %}
+
+<!-- Hero Section -->
+<section class="hero">
+    <div class="container">
+        <div class="hero-badge-wrap">
+            <span class="badge {{ event_status_class }}">{{ event_status_text }}</span>
+        </div>
+        <h1 class="hero-title">
+            <span class="text-gradient">Prompt to Product</span>
+        </h1>
+        <h2 class="hero-subtitle">
+            Turn Your Ideas into Intelligent Digital Products.
+        </h2>
+        <p class="hero-desc">
+            Join the AI Web Challenge by SSRS Group of Companies. Use modern AI tools and prompt engineering to transform an innovative idea into a functional, responsive web application.
+        </p>
+        <div class="hero-actions">
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('dashboard.index') }}" class="btn btn-lg btn-primary">Go to Dashboard</a>
+            {% else %}
+                <a href="{{ url_for('registration.register') }}" class="btn btn-lg btn-primary">Register Your Team</a>
+            {% endif %}
+            <a href="{{ url_for('public.problem_statement') }}" class="btn btn-lg btn-outline">View Problem Statement</a>
+            <a href="{{ site_settings.unstop_opportunity_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-lg btn-unstop">Register on Unstop</a>
+        </div>
+
+        <div class="hero-stats">
+            <div class="stat-item">
+                <span class="stat-number">1–4</span>
+                <span class="stat-label">Team Members</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">AI &amp; Web</span>
+                <span class="stat-label">Focus Domain</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">Top 3</span>
+                <span class="stat-label">Excellence Awards</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">Online</span>
+                <span class="stat-label">Event Format</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Active Announcements Banner (if any) -->
+{% if announcements %}
+<section style="background: rgba(37, 99, 235, 0.1); border-top: 1px solid rgba(59, 130, 246, 0.2); border-bottom: 1px solid rgba(59, 130, 246, 0.2); padding: 1rem 0;">
+    <div class="container" style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+        <span class="badge badge-primary">Announcement</span>
+        <div style="flex: 1; font-size: 0.95rem; color: #cbd5e1;">
+            <strong>{{ announcements[0].title }}:</strong> {{ announcements[0].message }}
+        </div>
+        <span style="font-size: 0.8rem; color: #94a3b8;">{{ announcements[0].published_at|ist_datetime }}</span>
+    </div>
+</section>
+{% endif %}
+
+<!-- How It Works Section -->
+<section class="section" id="how-it-works">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Process</span>
+            <h2 class="section-title">How It Works</h2>
+            <p class="lead">Four simple steps from innovative concept to deployed intelligent product.</p>
+        </div>
+
+        <div class="steps-grid">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <h3 class="step-title">Register Your Team</h3>
+                <p class="step-desc">
+                    The team leader creates a single account for 1 to 4 members, receives a unique Team ID, and connects to official channels.
+                </p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <h3 class="step-title">Access Problem Statement</h3>
+                <p class="step-desc">
+                    Review the official published requirements, target objectives, evaluation rubrics, and submission specifications.
+                </p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <h3 class="step-title">Build with AI Tools</h3>
+                <p class="step-desc">
+                    Accelerate your workflow using AI coding assistants and prompt engineering to build a polished, responsive web application.
+                </p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">4</div>
+                <h3 class="step-title">Submit Deployed Link</h3>
+                <p class="step-desc">
+                    Deploy your website publicly and submit the live URL both on this portal and the official Unstop opportunity page.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- About The Challenge Section -->
+<section class="section" id="about" style="background: rgba(12, 22, 38, 0.5);">
+    <div class="container">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center;">
+            <div>
+                <span class="section-tag">About The Challenge</span>
+                <h2 class="section-title">Empowering Builders with Generative AI</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 1.25rem; line-height: 1.7;">
+                    <strong>Prompt to Product – AI Web Challenge</strong> is organized by <strong>SSRS Group of Companies</strong> to bridge the gap between creative prompt ideas and production-ready digital applications.
+                </p>
+                <p style="color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.7;">
+                    Unlike traditional coding competitions where participants spend days writing boilerplate code, this challenge emphasizes <em>system thinking, intelligent UX, prompt orchestration, and fast deployment</em>.
+                </p>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <a href="{{ url_for('public.about') }}" class="btn btn-outline">Read Full Challenge Vision</a>
+                    <a href="{{ site_settings.whatsapp_group_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp">Join WhatsApp Community</a>
+                </div>
+            </div>
+
+            <div class="card" style="border-left: 4px solid var(--gold);">
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+                    <img src="{{ active_logo }}" alt="SSRSGC" style="height: 60px; width: auto; border-radius: 8px;">
+                    <div>
+                        <h3 style="margin: 0; color: #ffffff;">SSRS Group of Companies</h3>
+                        <span style="color: var(--gold); font-size: 0.85rem; font-weight: 600;">Official Organizer</span>
+                    </div>
+                </div>
+                <ul style="list-style: none; display: flex; flex-direction: column; gap: 1rem; color: #cbd5e1; font-size: 0.95rem;">
+                    <li style="display: flex; align-items: flex-start; gap: 0.75rem;">
+                        <span style="color: var(--accent-cyan); font-weight: bold;">&#10003;</span>
+                        <span>Open to all college students, independent developers, and aspiring designers.</span>
+                    </li>
+                    <li style="display: flex; align-items: flex-start; gap: 0.75rem;">
+                        <span style="color: var(--accent-cyan); font-weight: bold;">&#10003;</span>
+                        <span>Zero registration fee. 100% merit-based evaluation by technical jury.</span>
+                    </li>
+                    <li style="display: flex; align-items: flex-start; gap: 0.75rem;">
+                        <span style="color: var(--accent-cyan); font-weight: bold;">&#10003;</span>
+                        <span>Certificates of Excellence awarded to the Top 3 finalist teams.</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Problem Statement Preview Section -->
+<section class="section" id="problem">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Challenge Brief</span>
+            <h2 class="section-title">Official Problem Statement</h2>
+            <p class="lead">Built directly from live administrator configuration.</p>
+        </div>
+
+        {% if problem_statement %}
+        <div class="card" style="border-top: 4px solid var(--primary-light);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem;">
+                <span class="badge badge-primary">Version {{ problem_statement.version }} Published</span>
+                <span style="font-size: 0.85rem; color: #94a3b8;">Updated: {{ problem_statement.updated_at|ist_datetime }}</span>
+            </div>
+            <h3 style="font-size: 1.7rem; color: #ffffff; margin-bottom: 1rem;">
+                {{ problem_statement.title }}
+            </h3>
+            <p style="color: #cbd5e1; line-height: 1.7; margin-bottom: 1.5rem; font-size: 1.05rem;">
+                {{ problem_statement.description }}
+            </p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 2rem;">
+                <div style="background: rgba(0,0,0,0.25); padding: 1.25rem; border-radius: 8px;">
+                    <h4 style="color: var(--accent-cyan); font-size: 1rem; margin-bottom: 0.5rem;">Key Objectives</h4>
+                    <p style="color: #94a3b8; font-size: 0.9rem; white-space: pre-line; line-height: 1.6;">
+                        {{ problem_statement.objectives[:250] }}...
+                    </p>
+                </div>
+                <div style="background: rgba(0,0,0,0.25); padding: 1.25rem; border-radius: 8px;">
+                    <h4 style="color: var(--gold); font-size: 1rem; margin-bottom: 0.5rem;">Requirements Highlight</h4>
+                    <p style="color: #94a3b8; font-size: 0.9rem; white-space: pre-line; line-height: 1.6;">
+                        {{ problem_statement.requirements[:250] }}...
+                    </p>
+                </div>
+            </div>
+
+            <div style="text-align: center;">
+                <a href="{{ url_for('public.problem_statement') }}" class="btn btn-primary">
+                    View Full Problem Statement &amp; Guidelines &rarr;
+                </a>
+            </div>
+        </div>
+        {% else %}
+        <div class="card" style="text-align: center; padding: 3rem;">
+            <p style="color: #94a3b8; font-size: 1.1rem; margin-bottom: 1.5rem;">
+                The official problem statement is currently being prepared by the technical committee.
+            </p>
+            <span class="badge badge-warning">Publishing Soon</span>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Evaluation Criteria Section -->
+<section class="section" id="evaluation" style="background: rgba(12, 22, 38, 0.5);">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Rubric</span>
+            <h2 class="section-title">Evaluation Criteria</h2>
+            <p class="lead">Projects are evaluated out of 60 marks across six core dimensions.</p>
+        </div>
+
+        <div class="criteria-grid">
+            <div class="criteria-card">
+                <div class="criteria-header">
+                    <h3 style="font-size: 1.1rem; color: #ffffff;">Functionality &amp; Execution</h3>
+                    <span class="criteria-marks">10 Marks</span>
+                </div>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">
+                    Reliable operation, smooth user journeys, and absence of fatal runtime errors or broken user flows.
+                </p>
+            </div>
+
+            <div class="criteria-card">
+                <div class="criteria-header">
+                    <h3 style="font-size: 1.1rem; color: #ffffff;">AI &amp; Prompt Engineering</h3>
+                    <span class="criteria-marks">10 Marks</span>
+                </div>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">
+                    Depth and creativity in integrating generative AI, LLM APIs, prompt chaining, or intelligent reasoning.
+                </p>
+            </div>
+
+            <div class="criteria-card">
+                <div class="criteria-header">
+                    <h3 style="font-size: 1.1rem; color: #ffffff;">UI / UX &amp; Responsiveness</h3>
+                    <span class="criteria-marks">10 Marks</span>
+                </div>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">
+                    Visual elegance, typography, accessible color contrast, and seamless responsiveness across devices.
+                </p>
+            </div>
+
+            <div class="criteria-card">
+                <div class="criteria-header">
+                    <h3 style="font-size: 1.1rem; color: #ffffff;">Real-World Impact</h3>
+                    <span class="criteria-marks">10 Marks</span>
+                </div>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">
+                    Clear utility solving an authentic business, community, productivity, or consumer pain point.
+                </p>
+            </div>
+
+            <div class="criteria-card">
+                <div class="criteria-header">
+                    <h3 style="font-size: 1.1rem; color: #ffffff;">Code &amp; Architecture Quality</h3>
+                    <span class="criteria-marks">10 Marks</span>
+                </div>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">
+                    Clean project organization, maintainable component design, and secure handling of credentials.
+                </p>
+            </div>
+
+            <div class="criteria-card">
+                <div class="criteria-header">
+                    <h3 style="font-size: 1.1rem; color: #ffffff;">Live Deployment Quality</h3>
+                    <span class="criteria-marks">10 Marks</span>
+                </div>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6;">
+                    Fast load speed, HTTPS security, valid domain hosting, and immediate accessibility for reviewers.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Prizes & Certificates Section -->
+<section class="section" id="prizes">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Recognition</span>
+            <h2 class="section-title">Awards &amp; Certificates</h2>
+            <p class="lead">Prestigious institutional certificates awarded by SSRS Group of Companies.</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2.5rem;">
+            <div class="card" style="text-align: center; border-color: rgba(212, 163, 75, 0.4);">
+                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🥇</div>
+                <span class="badge badge-gold" style="margin-bottom: 0.75rem;">First Place</span>
+                <h3 style="color: #ffffff; font-size: 1.25rem;">Winner</h3>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;">
+                    Certificate of Excellence &bull; Feature on SSRS Group of Companies Official Media &bull; Priority consideration for internships.
+                </p>
+            </div>
+
+            <div class="card" style="text-align: center; border-color: rgba(148, 163, 184, 0.4);">
+                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🥈</div>
+                <span class="badge badge-primary" style="margin-bottom: 0.75rem;">Second Place</span>
+                <h3 style="color: #ffffff; font-size: 1.25rem;">1st Runner-Up</h3>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;">
+                    Certificate of Excellence &bull; Recognition across official channels.
+                </p>
+            </div>
+
+            <div class="card" style="text-align: center; border-color: rgba(180, 83, 9, 0.4);">
+                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🥉</div>
+                <span class="badge badge-warning" style="margin-bottom: 0.75rem;">Third Place</span>
+                <h3 style="color: #ffffff; font-size: 1.25rem;">2nd Runner-Up</h3>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;">
+                    Certificate of Excellence &bull; Recognition across official channels.
+                </p>
+            </div>
+        </div>
+
+        <div class="card" style="text-align: center; max-width: 700px; margin: 0 auto; background: rgba(16, 185, 129, 0.05); border-color: rgba(16, 185, 129, 0.2);">
+            <h4 style="color: #34d399; margin-bottom: 0.5rem;">Participation Certificates</h4>
+            <p style="color: var(--text-secondary); font-size: 0.95rem;">
+                All verified teams submitting a functional, deployed project conforming to the guidelines will be eligible for an official Participation Certificate issued by SSRS Group of Companies.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Official Results Showcase (when published by Super Admin) -->
+{% if results_published and results %}
+<section class="section" id="results" style="background: linear-gradient(180deg, rgba(212, 163, 75, 0.08) 0%, transparent 100%);">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag" style="color: var(--gold);">Official Announcement</span>
+            <h2 class="section-title text-gradient-gold">Winners &amp; Final Rankings</h2>
+            <p class="lead">Congratulations to the top teams evaluated by SSRS Group of Companies!</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+            {% for res in results if res.is_top_three %}
+            <div class="card" style="border: 2px solid var(--gold); text-align: center;">
+                <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">
+                    {% if res.rank == 1 %}🏆{% elif res.rank == 2 %}🥈{% else %}🥉{% endif %}
+                </div>
+                <span class="badge badge-gold" style="margin-bottom: 0.5rem;">Rank #{{ res.rank }}</span>
+                <h3 style="color: #ffffff; font-size: 1.35rem; margin-bottom: 0.25rem;">{{ res.team.team_name }}</h3>
+                <p style="color: var(--gold); font-size: 0.9rem; font-weight: 600;">{{ res.special_award }}</p>
+                <div style="margin-top: 1rem; font-size: 0.85rem; color: #94a3b8;">
+                    Leader: {{ res.team.leader.full_name }} &bull; {{ res.team.leader.college }}
+                </div>
+                {% if res.team.submission %}
+                <div style="margin-top: 1rem;">
+                    <a href="{{ res.team.submission.website_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline">
+                        View Winning Website &rarr;
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Submission Requirements Section -->
+<section class="section" id="submission-rules">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Specifications</span>
+            <h2 class="section-title">Submission Requirements</h2>
+            <p class="lead">Read carefully before deploying and submitting your application.</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+            <div class="card" style="border-left: 4px solid var(--success);">
+                <h3 style="color: #34d399; margin-bottom: 1rem;">What is Required</h3>
+                <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem; color: #cbd5e1; font-size: 0.95rem;">
+                    <li>&#10003; A live, publicly accessible website URL (e.g. <code>https://your-app.vercel.app</code>).</li>
+                    <li>&#10003; Working interactive prototype responsive on mobile and desktop.</li>
+                    <li>&#10003; Demonstrable AI feature, generative component, or prompt workflow.</li>
+                    <li>&#10003; Complete parallel submission on the official Unstop opportunity page.</li>
+                </ul>
+            </div>
+
+            <div class="card" style="border-left: 4px solid var(--danger);">
+                <h3 style="color: #f87171; margin-bottom: 1rem;">What is Strictly Disallowed</h3>
+                <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem; color: #cbd5e1; font-size: 0.95rem;">
+                    <li>&#10007; No ZIP file uploads, PDF project reports, or video attachments on this portal.</li>
+                    <li>&#10007; No localhost links (e.g. <code>http://localhost:3000</code>).</li>
+                    <li>&#10007; No non-functional mockups or static landing pages without working features.</li>
+                    <li>&#10007; No duplicate team registrations or member sharing across teams.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQs Section -->
+<section class="section" id="faqs" style="background: rgba(12, 22, 38, 0.5);">
+    <div class="container">
+        <div class="section-header">
+            <span class="section-tag">Clarifications</span>
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            <p class="lead">Answers to common participant inquiries.</p>
+        </div>
+
+        <div class="faq-accordion">
+            {% for faq in faqs %}
+            <div class="faq-item {% if loop.first %}active{% endif %}">
+                <div class="faq-question">
+                    <span>{{ faq.question }}</span>
+                    <span class="faq-icon">+</span>
+                </div>
+                <div class="faq-answer">
+                    <p>{{ faq.answer }}</p>
+                </div>
+            </div>
+            {% else %}
+            <p style="text-align: center; color: #94a3b8;">No FAQs published yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Final CTA Section -->
+<section class="section" style="text-align: center; padding: 5rem 0;">
+    <div class="container">
+        <h2 style="font-size: 2.5rem; margin-bottom: 1rem;">Ready to Turn Your Idea into a Product?</h2>
+        <p class="lead" style="max-width: 650px; margin: 0 auto 2rem;">
+            Assemble your team, unleash your creativity with AI prompt engineering, and build an exceptional web application today.
+        </p>
+        <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('dashboard.index') }}" class="btn btn-lg btn-primary">Go to Dashboard</a>
+            {% else %}
+                <a href="{{ url_for('registration.register') }}" class="btn btn-lg btn-primary">Register Your Team Now</a>
+            {% endif %}
+            <a href="{{ site_settings.unstop_opportunity_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-lg btn-unstop">Register on Unstop</a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

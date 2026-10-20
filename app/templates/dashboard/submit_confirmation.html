@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Submission Recorded | {{ team.team_name }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 3.5rem; padding-bottom: 5rem;">
+    <div style="max-width: 650px; margin: 0 auto; text-align: center;">
+        
+        <div class="card" style="border-top: 4px solid var(--success); padding: 3rem 2rem;">
+            <div style="font-size: 3rem; margin-bottom: 0.75rem;">🚀</div>
+            <span class="badge badge-success" style="margin-bottom: 1rem;">Submission Recorded Successfully</span>
+            <h1 style="font-size: 2.2rem; color: #ffffff; margin-bottom: 0.5rem;">Project Link Submitted!</h1>
+            <p class="lead" style="margin-bottom: 2rem;">
+                Your deployed project URL is now safely recorded in our MySQL database.
+            </p>
+
+            <!-- Details box -->
+            <div style="background: rgba(255, 255, 255, 0.04); border: 1px dashed rgba(255, 255, 255, 0.2); border-radius: 12px; padding: 1.5rem; text-align: left; margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
+                    <span style="color: var(--text-muted); font-size: 0.85rem;">Submission ID:</span>
+                    <strong style="color: #38bdf8; font-family: 'JetBrains Mono', monospace;">{{ submission.submission_id }}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
+                    <span style="color: var(--text-muted); font-size: 0.85rem;">Team ID:</span>
+                    <strong style="color: var(--gold); font-family: 'JetBrains Mono', monospace;">{{ team.registration_id }}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.75rem;">
+                    <span style="color: var(--text-muted); font-size: 0.85rem;">Submitted Timestamp:</span>
+                    <strong style="color: #cbd5e1;">{{ submission.submitted_at|ist_datetime }}</strong>
+                </div>
+                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+                    <span style="color: var(--text-muted); font-size: 0.85rem; display: block; margin-bottom: 0.25rem;">Deployed Website Link:</span>
+                    <a href="{{ submission.website_url }}" target="_blank" rel="noopener noreferrer" style="color: var(--accent-cyan); font-weight: 600; word-break: break-all;">
+                        {{ submission.website_url }} &UpperRightArrow;
+                    </a>
+                </div>
+            </div>
+
+            <!-- Open website in new tab CTA -->
+            <div style="display: flex; gap: 1rem; justify-content: center; margin-bottom: 2rem; flex-wrap: wrap;">
+                <a href="{{ submission.website_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline">
+                    Verify Link (Open in New Tab) &UpperRightArrow;
+                </a>
+            </div>
+
+            <!-- Mandatory Unstop Submission Warning -->
+            <div style="background: rgba(0, 118, 254, 0.1); border-left: 4px solid #0076fe; border-radius: 8px; padding: 1.25rem; text-align: left; margin-bottom: 2rem;">
+                <h4 style="color: #60a5fa; margin: 0 0 0.5rem; font-size: 1rem;">Action Required: Submit on Unstop</h4>
+                <p style="color: #cbd5e1; font-size: 0.9rem; margin: 0 0 1rem; line-height: 1.6;">
+                    {{ confirmation_text }}
+                </p>
+                <a href="{{ unstop_sub_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-unstop">
+                    Submit on Unstop Now &UpperRightArrow;
+                </a>
+            </div>
+
+            <a href="{{ url_for('dashboard.index') }}" class="btn btn-primary" style="width: 100%;">
+                Return to Dashboard &rarr;
+            </a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

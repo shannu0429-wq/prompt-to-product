@@ -1,0 +1,123 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Admin Users & Permissions{% endblock %}
+{% block page_title %}Administrator Accounts &amp; Access Control{% endblock %}
+
+{% block admin_content %}
+<div style="max-width: 950px;">
+
+    <!-- Create Admin Account Card -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <h3 style="color: #ffffff; margin-bottom: 1rem;">Create New Administrator</h3>
+
+        <form method="POST" action="{{ url_for('admin.admin_users') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="create_admin">
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Full Name <span class="required">*</span></label>
+                    <input type="text" name="full_name" class="form-control" placeholder="Admin Full Name" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email Address <span class="required">*</span></label>
+                    <input type="email" name="email" class="form-control" placeholder="admin@ssrsgc.com" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Password <span class="required">*</span></label>
+                    <input type="password" name="password" class="form-control" placeholder="Min 8 characters" minlength="8" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Administrative Role</label>
+                    <select name="role" class="form-control">
+                        <option value="admin">Admin (Operational &amp; Evaluations)</option>
+                        <option value="super_admin">Super Admin (Full Portal Control)</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Create Administrator Account</button>
+        </form>
+    </div>
+
+    <!-- Admin Users Table -->
+    <div class="table-card">
+        <div class="table-header">
+            <h3 class="table-title">Authorized Administrators ({{ admins|length }})</h3>
+        </div>
+
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Administrator</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Created At</th>
+                        <th>Last Login</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in admins %}
+                    <tr>
+                        <td>
+                            <strong style="color: #ffffff;">{{ a.full_name }}</strong><br>
+                            <span style="font-size: 0.78rem; color: #94a3b8;">{{ a.email }}</span>
+                        </td>
+                        <td>
+                            {% if a.role == 'super_admin' %}
+                                <span class="badge badge-gold">Super Admin</span>
+                            {% else %}
+                                <span class="badge badge-primary">Admin</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if a.is_active %}
+                                <span class="badge badge-success">Active</span>
+                            {% else %}
+                                <span class="badge badge-danger">Suspended</span>
+                            {% endif %}
+                        </td>
+                        <td style="font-size: 0.8rem;">{{ a.created_at|ist_datetime }}</td>
+                        <td style="font-size: 0.8rem;">{{ a.last_login_at|ist_datetime if a.last_login_at else 'Never' }}</td>
+                        <td>
+                            {% if a.id != current_user.id %}
+                            <div style="display: flex; gap: 0.4rem;">
+                                <!-- Toggle status -->
+                                <form method="POST" action="{{ url_for('admin.admin_users') }}">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <input type="hidden" name="action" value="toggle_status">
+                                    <input type="hidden" name="user_id" value="{{ a.id }}">
+                                    <button type="submit" class="btn btn-sm {% if a.is_active %}btn-danger{% else %}btn-success{% endif %}">
+                                        {% if a.is_active %}Suspend{% else %}Activate{% endif %}
+                                    </button>
+                                </form>
+
+                                <!-- Change role -->
+                                <form method="POST" action="{{ url_for('admin.admin_users') }}" onsubmit="return confirm('Change role for {{ a.email }}?');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <input type="hidden" name="action" value="change_role">
+                                    <input type="hidden" name="user_id" value="{{ a.id }}">
+                                    <input type="hidden" name="new_role" value="{% if a.role == 'super_admin' %}admin{% else %}super_admin{% endif %}">
+                                    <button type="submit" class="btn btn-sm btn-outline">
+                                        {% if a.role == 'super_admin' %}Demote to Admin{% else %}Promote to Super Admin{% endif %}
+                                    </button>
+                                </form>
+                            </div>
+                            {% else %}
+                            <span style="font-size: 0.8rem; color: var(--text-muted);">Current User</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

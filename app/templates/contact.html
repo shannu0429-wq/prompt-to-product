@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Contact & Support | Prompt to Product{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 3rem; padding-bottom: 4rem;">
+    <div style="max-width: 800px; margin: 0 auto;">
+        
+        <div style="text-align: center; margin-bottom: 3rem;">
+            <span class="badge badge-primary">Get in Touch</span>
+            <h1 style="font-size: 2.75rem; margin-top: 0.75rem;" class="text-gradient">Contact &amp; Support</h1>
+            <p class="lead">Need assistance or have questions regarding Prompt to Product?</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2.5rem;">
+            <div class="card">
+                <h3 style="color: #38bdf8; margin-bottom: 1rem;">Direct Channels</h3>
+                <p style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 1rem;">
+                    For real-time queries and community discussions, our WhatsApp community is monitored continuously.
+                </p>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <a href="{{ site_settings.whatsapp_group_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-whatsapp" style="width: 100%;">
+                        Join WhatsApp Community
+                    </a>
+                    <a href="{{ site_settings.unstop_opportunity_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-unstop" style="width: 100%;">
+                        Visit Unstop Opportunity
+                    </a>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 style="color: var(--gold); margin-bottom: 1rem;">Official Organizer</h3>
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+                    <img src="{{ active_logo }}" alt="Logo" style="height: 48px; border-radius: 6px;">
+                    <div>
+                        <h4 style="margin: 0; color: #ffffff;">SSRS Group of Companies</h4>
+                        <span style="font-size: 0.75rem; color: var(--gold); text-transform: uppercase;">Technical Organizing Committee</span>
+                    </div>
+                </div>
+                <p style="color: #cbd5e1; font-size: 0.9rem; margin: 0.35rem 0;">
+                    <strong>Email:</strong> <a href="mailto:{{ site_settings.contact_email }}">{{ site_settings.contact_email }}</a>
+                </p>
+                <p style="color: #cbd5e1; font-size: 0.9rem; margin: 0.35rem 0;">
+                    <strong>Phone:</strong> {{ site_settings.contact_phone }}
+                </p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 style="color: #ffffff; margin-bottom: 1.5rem;">Send Us a Message</h3>
+            <form method="POST" action="{{ url_for('public.contact') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Your Name <span class="required">*</span></label>
+                        <input type="text" name="name" class="form-control" placeholder="John Doe" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Your Email <span class="required">*</span></label>
+                        <input type="email" name="email" class="form-control" placeholder="john@example.com" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Subject</label>
+                    <input type="text" name="subject" class="form-control" placeholder="Inquiry about Prompt to Product">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Message <span class="required">*</span></label>
+                    <textarea name="message" class="form-control" rows="4" placeholder="How can the organizing committee assist you?" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Send Inquiry</button>
+            </form>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

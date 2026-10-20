@@ -1,0 +1,126 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Registrations & Teams{% endblock %}
+{% block page_title %}Team Registrations &amp; Participant Management{% endblock %}
+
+{% block admin_content %}
+
+<!-- Search and Filter Bar -->
+<div class="card" style="margin-bottom: 2rem;">
+    <form method="GET" action="{{ url_for('admin.registrations') }}" style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
+        <div style="flex: 2; min-width: 250px;">
+            <label class="form-label">Search Query</label>
+            <input type="text" name="q" class="form-control" placeholder="Search by team name, ID, leader, email, phone..." value="{{ search_query }}">
+        </div>
+
+        <div style="flex: 1; min-width: 180px;">
+            <label class="form-label">Status Filter</label>
+            <select name="status" class="form-control">
+                <option value="">All Statuses</option>
+                <option value="registered" {% if status_filter == 'registered' %}selected{% endif %}>Registered</option>
+                <option value="verified" {% if status_filter == 'verified' %}selected{% endif %}>Verified</option>
+                <option value="under_review" {% if status_filter == 'under_review' %}selected{% endif %}>Under Review</option>
+                <option value="suspended" {% if status_filter == 'suspended' %}selected{% endif %}>Suspended</option>
+            </select>
+        </div>
+
+        <div style="display: flex; gap: 0.5rem;">
+            <button type="submit" class="btn btn-primary">Filter</button>
+            <a href="{{ url_for('admin.registrations') }}" class="btn btn-outline">Reset</a>
+            <a href="{{ url_for('admin.export_registrations') }}" class="btn btn-gold" style="white-space: nowrap;">
+                📥 Export CSV
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- Teams Table -->
+<div class="table-card">
+    <div class="table-header">
+        <h3 class="table-title">Registered Teams (Total: {{ pagination.total }})</h3>
+    </div>
+
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Registration ID</th>
+                    <th>Team Name</th>
+                    <th>Leader Details</th>
+                    <th>College / City</th>
+                    <th>Size</th>
+                    <th>Status</th>
+                    <th>Submitted</th>
+                    <th>Registered At</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in teams %}
+                <tr>
+                    <td>
+                        <strong style="color: var(--gold); font-family: 'JetBrains Mono', monospace;">{{ t.registration_id }}</strong>
+                    </td>
+                    <td style="font-weight: 600; color: #ffffff;">{{ t.team_name }}</td>
+                    <td>
+                        <div style="color: #ffffff;">{{ t.leader.full_name }}</div>
+                        <div style="font-size: 0.78rem; color: #94a3b8;">{{ t.leader.email }}</div>
+                        <div style="font-size: 0.78rem; color: #94a3b8;">{{ t.leader.phone }}</div>
+                    </td>
+                    <td style="font-size: 0.85rem;">
+                        {{ t.leader.college }}<br>
+                        <span style="font-size: 0.75rem; color: #94a3b8;">{{ t.leader.city }}, {{ t.leader.state }}</span>
+                    </td>
+                    <td style="text-align: center;"><strong>{{ t.team_size }}</strong></td>
+                    <td>
+                        {% if t.registration_status == 'registered' %}
+                            <span class="badge badge-primary">Registered</span>
+                        {% elif t.registration_status == 'verified' %}
+                            <span class="badge badge-success">Verified</span>
+                        {% elif t.registration_status == 'suspended' %}
+                            <span class="badge badge-danger">Suspended</span>
+                        {% else %}
+                            <span class="badge badge-warning">{{ t.registration_status }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if t.submission %}
+                            <span class="badge badge-success">Submitted</span>
+                        {% else %}
+                            <span class="badge badge-secondary">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td style="font-size: 0.82rem;">{{ t.created_at|ist_datetime }}</td>
+                    <td>
+                        <a href="{{ url_for('admin.team_detail', team_id=t.id) }}" class="btn btn-sm btn-outline">
+                            Manage &rarr;
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9" style="text-align: center; color: #94a3b8; padding: 2rem;">
+                        No team registrations matched the criteria.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if pagination.pages > 1 %}
+    <ul class="pagination">
+        {% for p in pagination.iter_pages(left_edge=2, right_edge=2, left_current=2, right_current=2) %}
+            {% if p %}
+                <li class="page-item {% if p == pagination.page %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('admin.registrations', page=p, q=search_query, status=status_filter) }}">{{ p }}</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">&hellip;</span></li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+    {% endif %}
+</div>
+{% endblock %}

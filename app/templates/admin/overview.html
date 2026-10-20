@@ -1,0 +1,147 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Overview{% endblock %}
+{% block page_title %}Dashboard Overview{% endblock %}
+
+{% block admin_content %}
+
+<!-- Live Database Stats Grid -->
+<div class="stats-grid">
+    <div class="stat-box">
+        <span class="stat-box-title">Total Teams</span>
+        <div class="stat-box-number">{{ total_teams }}</div>
+        <span class="stat-box-sub">{{ total_leaders }} registered leaders</span>
+    </div>
+
+    <div class="stat-box gold">
+        <span class="stat-box-title">Total Participants</span>
+        <div class="stat-box-number">{{ total_members }}</div>
+        <span class="stat-box-sub">Including all team members</span>
+    </div>
+
+    <div class="stat-box success">
+        <span class="stat-box-title">Projects Submitted</span>
+        <div class="stat-box-number">{{ total_submissions }}</div>
+        <span class="stat-box-sub">{{ pending_submissions }} awaiting review</span>
+    </div>
+
+    <div class="stat-box">
+        <span class="stat-box-title">Shortlisted</span>
+        <div class="stat-box-number">{{ shortlisted_submissions }}</div>
+        <span class="stat-box-sub">Marked by evaluation jury</span>
+    </div>
+</div>
+
+<!-- Problem Statement & Actions Banner -->
+<div class="card" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+    <div>
+        <span style="font-size: 0.8rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Problem Statement Status</span>
+        {% if published_problem %}
+            <h3 style="margin: 0.25rem 0; color: #38bdf8;">
+                v{{ published_problem.version }}: {{ published_problem.title }}
+            </h3>
+            <p style="margin: 0; font-size: 0.85rem; color: #cbd5e1;">
+                Published on {{ published_problem.published_at|ist_datetime }}
+            </p>
+        {% else %}
+            <h3 style="margin: 0.25rem 0; color: #f59e0b;">No Problem Statement Currently Published</h3>
+            <p style="margin: 0; font-size: 0.85rem; color: #cbd5e1;">Participants cannot see the challenge requirements.</p>
+        {% endif %}
+    </div>
+    <div style="display: flex; gap: 0.75rem;">
+        <a href="{{ url_for('admin.problem_statement') }}" class="btn btn-sm btn-primary">
+            Manage Problem Statement
+        </a>
+        <a href="{{ url_for('admin.event_settings') }}" class="btn btn-sm btn-outline">
+            Event Settings
+        </a>
+    </div>
+</div>
+
+<!-- Recent Teams Table -->
+<div class="table-card">
+    <div class="table-header">
+        <h3 class="table-title">Recent Team Registrations</h3>
+        <a href="{{ url_for('admin.registrations') }}" class="btn btn-sm btn-outline">View All Registrations &rarr;</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Registration ID</th>
+                    <th>Team Name</th>
+                    <th>Leader</th>
+                    <th>Size</th>
+                    <th>Status</th>
+                    <th>Submitted</th>
+                    <th>Registered At</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in recent_teams %}
+                <tr>
+                    <td><strong style="color: var(--gold); font-family: 'JetBrains Mono', monospace;">{{ t.registration_id }}</strong></td>
+                    <td style="font-weight: 600; color: #ffffff;">{{ t.team_name }}</td>
+                    <td>{{ t.leader.full_name }}<br><span style="font-size: 0.75rem; color: #94a3b8;">{{ t.leader.email }}</span></td>
+                    <td>{{ t.team_size }}</td>
+                    <td><span class="badge badge-primary" style="font-size: 0.7rem;">{{ t.registration_status }}</span></td>
+                    <td>
+                        {% if t.submission %}
+                            <span class="badge badge-success" style="font-size: 0.7rem;">Yes</span>
+                        {% else %}
+                            <span class="badge badge-warning" style="font-size: 0.7rem;">No</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ t.created_at|ist_datetime }}</td>
+                    <td>
+                        <a href="{{ url_for('admin.team_detail', team_id=t.id) }}" class="btn btn-sm btn-outline">Manage</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" style="text-align: center; color: #94a3b8; padding: 2rem;">No teams registered yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Recent Security & Audit Logs -->
+<div class="table-card">
+    <div class="table-header">
+        <h3 class="table-title">Recent System Audit Events</h3>
+        <a href="{{ url_for('admin.audit_logs') }}" class="btn btn-sm btn-outline">Full Audit Trail &rarr;</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Action</th>
+                    <th>Entity</th>
+                    <th>Entity ID</th>
+                    <th>Timestamp</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in recent_logs %}
+                <tr>
+                    <td><span style="font-weight: 600; color: #38bdf8;">{{ log.action.replace('_', ' ').title() }}</span></td>
+                    <td>{{ log.entity_type }}</td>
+                    <td>{{ log.entity_id or '—' }}</td>
+                    <td>{{ log.created_at|ist_datetime }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" style="text-align: center; color: #94a3b8; padding: 1.5rem;">No audit logs yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

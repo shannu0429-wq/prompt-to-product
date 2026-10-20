@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}Team Leader Dashboard | {{ team.team_name }}{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2.5rem; padding-bottom: 5rem;">
+
+    <!-- Dashboard Top Bar -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <h1 style="font-size: 2.2rem; color: #ffffff; margin: 0;">{{ team.team_name }}</h1>
+                <span class="badge badge-primary">{{ team.registration_status|title }}</span>
+            </div>
+            <p style="color: var(--text-secondary); margin-top: 0.25rem;">
+                Registration ID: <span style="font-family: 'JetBrains Mono', monospace; color: var(--gold); font-weight: 700;">{{ team.registration_id }}</span>
+            </p>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+            {% if can_submit %}
+                <a href="{{ url_for('submissions.submit') }}" class="btn btn-primary">
+                    {% if submission %}View / Edit Submission{% else %}Submit Project Link &rarr;{% endif %}
+                </a>
+            {% endif %}
+            <a href="{{ url_for('dashboard.settings') }}" class="btn btn-outline">Settings</a>
+            <a href="{{ url_for('auth.logout') }}" class="btn btn-outline" style="color: #f87171;">Logout</a>
+        </div>
+    </div>
+
+    <!-- Quick Info Cards Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; margin-bottom: 2.5rem;">
+        <!-- Submission Status Card -->
+        <div class="card" style="border-left: 4px solid {% if submission %}var(--success){% else %}var(--warning){% endif %};">
+            <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Project Submission</span>
+            <div style="margin: 0.5rem 0;">
+                {% if submission %}
+                    <span class="badge badge-success" style="font-size: 0.9rem;">Submitted</span>
+                    <p style="color: #38bdf8; font-size: 0.88rem; margin-top: 0.5rem; word-break: break-all;">
+                        <a href="{{ submission.website_url }}" target="_blank" rel="noopener noreferrer" style="color: #38bdf8;">
+                            {{ submission.website_url }} &UpperRightArrow;
+                        </a>
+                    </p>
+                {% else %}
+                    <span class="badge badge-warning" style="font-size: 0.9rem;">Pending Submission</span>
+                    <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.5rem;">
+                        No website link submitted yet.
+                    </p>
+                {% endif %}
+            </div>
+            {% if can_submit %}
+                <a href="{{ url_for('submissions.submit') }}" style="font-size: 0.85rem; color: #60a5fa; font-weight: 600;">
+                    {% if submission %}Update Link &rarr;{% else %}Submit Now &rarr;{% endif %}
+                </a>
+            {% else %}
+                <span style="font-size: 0.8rem; color: #94a3b8;">Submissions currently closed</span>
+            {% endif %}
+        </div>
+
+        <!-- Submission Deadline Card -->
+        <div class="card" style="border-left: 4px solid var(--accent-cyan);">
+            <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Submission Deadline</span>
+            <div style="font-size: 1.1rem; font-weight: 700; color: #ffffff; margin: 0.5rem 0;">
+                {{ submission_deadline|ist_datetime }}
+            </div>
+            <p style="color: var(--text-secondary); font-size: 0.85rem; margin: 0;">
+                Enforced in Indian Standard Time (IST).
+            </p>
+        </div>
+
+        <!-- WhatsApp Quick Link -->
+        <div class="card" style="border-left: 4px solid #25d366;">
+            <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Official Community</span>
+            <div style="margin: 0.5rem 0;">
+                <p style="color: #cbd5e1; font-size: 0.88rem; margin: 0 0 0.5rem;">
+                    Get direct mentorship and event support.
+                </p>
+            </div>
+            <a href="{{ whatsapp_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-whatsapp">
+                Join WhatsApp Group
+            </a>
+        </div>
+
+        <!-- Unstop Status Card -->
+        <div class="card" style="border-left: 4px solid #0076fe;">
+            <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Unstop Verification</span>
+            <div style="margin: 0.5rem 0;">
+                <p style="color: #cbd5e1; font-size: 0.85rem; margin: 0 0 0.5rem;">
+                    Ensure all team members are registered on Unstop.
+                </p>
+            </div>
+            <a href="{{ unstop_reg_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-unstop">
+                Check Unstop Page
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
+        
+        <!-- Left: Team Roster & Problem Statement -->
+        <div>
+            <!-- Team Members Card -->
+            <div class="card" style="margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                    <h3 style="font-size: 1.25rem; color: #ffffff; margin: 0;">Team Roster ({{ team.members|length }})</h3>
+                    {% if team.allow_edit %}
+                        <a href="{{ url_for('dashboard.settings') }}" class="badge badge-warning">Edit Allowed</a>
+                    {% endif %}
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    {% for m in team.members %}
+                    <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <strong style="color: #ffffff; font-size: 1rem;">{{ m.full_name }}</strong>
+                                {% if m.is_leader %}
+                                    <span class="badge badge-primary" style="font-size: 0.7rem;">Team Leader</span>
+                                {% endif %}
+                            </div>
+                            <div style="color: #94a3b8; font-size: 0.85rem; margin-top: 0.25rem;">
+                                {{ m.email }} &bull; {{ m.phone }}
+                            </div>
+                        </div>
+                        <div style="text-align: right; font-size: 0.85rem; color: #cbd5e1;">
+                            {{ m.college }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Published Problem Statement Box -->
+            <div class="card" style="margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="font-size: 1.25rem; color: #ffffff; margin: 0;">Problem Statement</h3>
+                    {% if problem %}
+                        <span class="badge badge-success">v{{ problem.version }} Published</span>
+                    {% else %}
+                        <span class="badge badge-warning">Pending</span>
+                    {% endif %}
+                </div>
+
+                {% if problem %}
+                    <h4 style="color: var(--accent-cyan); font-size: 1.15rem; margin-bottom: 0.75rem;">
+                        {{ problem.title }}
+                    </h4>
+                    <p style="color: #cbd5e1; font-size: 0.95rem; line-height: 1.7; margin-bottom: 1.5rem;">
+                        {{ problem.description }}
+                    </p>
+                    <a href="{{ url_for('public.problem_statement') }}" class="btn btn-sm btn-outline">
+                        View Detailed Objectives &amp; Evaluation Criteria &rarr;
+                    </a>
+                {% else %}
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">
+                        The problem statement is currently being finalized. Please monitor this dashboard.
+                    </p>
+                {% endif %}
+            </div>
+
+            <!-- Submission History Audit -->
+            {% if submission and submission.history %}
+            <div class="card">
+                <h3 style="font-size: 1.25rem; color: #ffffff; margin-bottom: 1rem;">Submission Activity History</h3>
+                <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    {% for h in submission.history %}
+                    <div style="font-size: 0.85rem; color: #cbd5e1; padding: 0.6rem 0.85rem; background: rgba(0,0,0,0.2); border-radius: 6px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                        <div>
+                            <span style="font-weight: 600; color: #38bdf8;">{{ h.change_type.replace('_', ' ').title() }}</span>:
+                            <span style="word-break: break-all;">{{ h.website_url }}</span>
+                        </div>
+                        <span style="color: #64748b; font-size: 0.78rem;">
+                            {{ h.changed_at|ist_datetime }}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Right: Action Center & Rules Summary -->
+        <div>
+            <!-- Submission Action Card -->
+            <div class="card" style="margin-bottom: 2rem; border-top: 3px solid var(--primary-light);">
+                <h3 style="font-size: 1.15rem; color: #ffffff; margin-bottom: 1rem;">Submission Actions</h3>
+                
+                <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.6; margin-bottom: 1.25rem;">
+                    Your project must accept only a deployed web application link. Ensure the site is live and public.
+                </p>
+
+                {% if can_submit %}
+                    <a href="{{ url_for('submissions.submit') }}" class="btn btn-primary" style="width: 100%; margin-bottom: 0.75rem;">
+                        {% if submission %}Edit Deployed Link{% else %}Submit Deployed Project{% endif %}
+                    </a>
+                {% else %}
+                    <button class="btn btn-secondary" style="width: 100%; margin-bottom: 0.75rem;" disabled>
+                        Submissions Locked
+                    </button>
+                {% endif %}
+
+                <a href="{{ unstop_sub_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-unstop" style="width: 100%;">
+                    Submit on Unstop &UpperRightArrow;
+                </a>
+            </div>
+
+            <!-- Guidelines Checklist Card -->
+            <div class="card">
+                <h3 style="font-size: 1.15rem; color: #ffffff; margin-bottom: 1rem;">Submission Checklist</h3>
+                <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.6rem; color: #cbd5e1; font-size: 0.88rem; padding: 0;">
+                    <li>&#10003; Live HTTPS deployment (Vercel, Netlify, Render, etc.).</li>
+                    <li>&#10003; Clear prompt engineering or AI feature integration.</li>
+                    <li>&#10003; Responsive layout across mobile and desktop.</li>
+                    <li>&#10003; All interactive buttons and forms operational.</li>
+                    <li>&#10003; Submitted on both this portal and Unstop.</li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

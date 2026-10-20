@@ -1,0 +1,80 @@
+{% extends "admin/base.html" %}
+
+{% block title %}FAQs Management{% endblock %}
+{% block page_title %}Frequently Asked Questions Management{% endblock %}
+
+{% block admin_content %}
+<div style="max-width: 900px;">
+
+    <!-- Add FAQ Form -->
+    <div class="card" style="margin-bottom: 2rem;">
+        <h3 style="color: #ffffff; margin-bottom: 1rem;">Add New FAQ</h3>
+
+        <form method="POST" action="{{ url_for('admin.faqs') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="create">
+
+            <div class="form-row">
+                <div class="form-group" style="flex: 3;">
+                    <label class="form-label">Question <span class="required">*</span></label>
+                    <input type="text" name="question" class="form-control" placeholder="e.g. Can we use Python for the backend?" required>
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label class="form-label">Display Order</label>
+                    <input type="number" name="display_order" class="form-control" value="0">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Answer <span class="required">*</span></label>
+                <textarea name="answer" class="form-control" rows="3" placeholder="Provide a helpful, precise explanation..." required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Add FAQ Item</button>
+        </form>
+    </div>
+
+    <!-- FAQs Table -->
+    <div class="table-card">
+        <div class="table-header">
+            <h3 class="table-title">Published FAQs ({{ faqs|length }})</h3>
+        </div>
+
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">Order</th>
+                        <th>Question &amp; Answer</th>
+                        <th style="width: 100px;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for f in faqs %}
+                    <tr>
+                        <td style="text-align: center; font-weight: 700; color: var(--gold);">{{ f.display_order }}</td>
+                        <td>
+                            <strong style="color: #ffffff; font-size: 0.95rem;">{{ f.question }}</strong>
+                            <p style="margin: 0.25rem 0 0; color: #94a3b8; font-size: 0.85rem; line-height: 1.5;">{{ f.answer }}</p>
+                        </td>
+                        <td>
+                            <form method="POST" action="{{ url_for('admin.faqs') }}" onsubmit="return confirm('Remove this FAQ item?');">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <input type="hidden" name="action" value="delete">
+                                <input type="hidden" name="faq_id" value="{{ f.id }}">
+                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="3" style="text-align: center; color: #94a3b8; padding: 2rem;">No FAQs added yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
