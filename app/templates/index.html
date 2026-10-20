@@ -19,6 +19,55 @@
         <p class="hero-desc">
             Join the AI Web Challenge by SSRS Group of Companies. Use modern AI tools and prompt engineering to transform an innovative idea into a functional, responsive web application.
         </p>
+
+        <!-- Dynamic Event Timeline Countdown -->
+        {% if not site_timeline.is_problem_released %}
+        <div class="countdown-container">
+            <div class="countdown-title">
+                ⏳ Problem Statement Releases On: {{ site_settings.problem_statement_release_date|ist_datetime }}
+            </div>
+            <div class="countdown-timer" data-target="{{ site_settings.problem_statement_release_date|iso_datetime }}">
+                <div class="countdown-unit"><span class="countdown-value days">00</span><span class="countdown-label">Days</span></div>
+                <div class="countdown-colon">:</div>
+                <div class="countdown-unit"><span class="countdown-value hours">00</span><span class="countdown-label">Hours</span></div>
+                <div class="countdown-colon">:</div>
+                <div class="countdown-unit"><span class="countdown-value minutes">00</span><span class="countdown-label">Minutes</span></div>
+                <div class="countdown-colon">:</div>
+                <div class="countdown-unit"><span class="countdown-value seconds">00</span><span class="countdown-label">Seconds</span></div>
+            </div>
+        </div>
+        {% elif not site_timeline.is_submission_started %}
+        <div class="countdown-container">
+            <div class="countdown-title">
+                🚀 Submissions Open On: {{ site_settings.submission_start_date|ist_datetime }}
+            </div>
+            <div class="countdown-timer" data-target="{{ site_settings.submission_start_date|iso_datetime }}">
+                <div class="countdown-unit"><span class="countdown-value days">00</span><span class="countdown-label">Days</span></div>
+                <div class="countdown-colon">:</div>
+                <div class="countdown-unit"><span class="countdown-value hours">00</span><span class="countdown-label">Hours</span></div>
+                <div class="countdown-colon">:</div>
+                <div class="countdown-unit"><span class="countdown-value minutes">00</span><span class="countdown-label">Minutes</span></div>
+                <div class="countdown-colon">:</div>
+                <div class="countdown-unit"><span class="countdown-value seconds">00</span><span class="countdown-label">Seconds</span></div>
+            </div>
+        </div>
+        {% elif not site_timeline.is_submission_closed %}
+        <div class="countdown-container">
+            <div class="countdown-title">
+                🔥 Submission Final Deadline: {{ site_settings.submission_deadline|ist_datetime }}
+            </div>
+            <div class="countdown-timer" data-target="{{ site_settings.submission_deadline|iso_datetime }}">
+                <div class="countdown-unit"><span class="countdown-value days">00</span><span class="countdown-label">Days</span></div>
+                <div class="countdown-colon">:</div>
+                <div class="countdown-unit"><span class="countdown-value hours">00</span><span class="countdown-label">Hours</span></div>
+                <div class="countdown-colon">:</div>
+                <div class="countdown-unit"><span class="countdown-value minutes">00</span><span class="countdown-label">Minutes</span></div>
+                <div class="countdown-colon">:</div>
+                <div class="countdown-unit"><span class="countdown-value seconds">00</span><span class="countdown-label">Seconds</span></div>
+            </div>
+        </div>
+        {% endif %}
+
         <div class="hero-actions">
             {% if current_user.is_authenticated %}
                 <a href="{{ url_for('dashboard.index') }}" class="btn btn-lg btn-primary">Go to Dashboard</a>
@@ -195,11 +244,26 @@
             </div>
         </div>
         {% else %}
-        <div class="card" style="text-align: center; padding: 3rem;">
-            <p style="color: #94a3b8; font-size: 1.1rem; margin-bottom: 1.5rem;">
-                The official problem statement is currently being prepared by the technical committee.
+        <div class="card" style="text-align: center; padding: 3rem; border-top: 4px solid var(--gold);">
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🔒</div>
+            <span class="badge badge-gold" style="margin-bottom: 1rem;">Official Release Scheduled</span>
+            <h3 style="color: #ffffff; margin-bottom: 0.5rem;">Problem Statement Releases On</h3>
+            <p style="color: var(--gold); font-size: 1.2rem; font-weight: 700; margin-bottom: 1.5rem;">
+                {{ site_settings.problem_statement_release_date|ist_datetime }}
             </p>
-            <span class="badge badge-warning">Publishing Soon</span>
+            <div class="countdown-timer" data-target="{{ site_settings.problem_statement_release_date|iso_datetime }}" style="justify-content: center; margin-bottom: 1.5rem;">
+                <div class="countdown-unit"><span class="countdown-value days">00</span><span class="countdown-label">Days</span></div>
+                <div class="countdown-colon">:</div>
+                <div class="countdown-unit"><span class="countdown-value hours">00</span><span class="countdown-label">Hours</span></div>
+                <div class="countdown-colon">:</div>
+                <div class="countdown-unit"><span class="countdown-value minutes">00</span><span class="countdown-label">Minutes</span></div>
+                <div class="countdown-colon">:</div>
+                <div class="countdown-unit"><span class="countdown-value seconds">00</span><span class="countdown-label">Seconds</span></div>
+            </div>
+            <p style="color: #94a3b8; font-size: 0.95rem; max-width: 550px; margin: 0 auto 1.5rem;">
+                The complete problem statement, technical objectives, and evaluation rubric will automatically unlock here once the countdown reaches zero.
+            </p>
+            <a href="{{ url_for('registration.register') }}" class="btn btn-primary">Register Your Team in Advance</a>
         </div>
         {% endif %}
     </div>

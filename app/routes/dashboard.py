@@ -29,11 +29,13 @@ def index():
     reg_deadline_str = SettingsService.get_setting('registration_end_date')
 
     can_submit = SettingsService.are_submissions_open(team)
+    timeline = SettingsService.get_timeline()
 
     return render_template(
         'dashboard/index.html',
         team=team,
         problem=problem,
+        timeline=timeline,
         event_status_text=status_text,
         event_status_class=status_class,
         whatsapp_url=whatsapp_url,

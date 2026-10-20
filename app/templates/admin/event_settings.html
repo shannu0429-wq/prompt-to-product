@@ -27,19 +27,30 @@
             </div>
         </div>
 
-        <h4 style="color: var(--accent-cyan); font-size: 1.1rem; margin: 1.5rem 0 1rem;">2. Project Submission Window</h4>
-        <div class="form-row">
-            <div class="form-group">
-                <label class="form-label">Submission Opening Datetime (YYYY-MM-DD HH:MM:SS)</label>
-                <input type="text" name="submission_start_date" class="form-control" value="{{ settings.submission_start_date }}" required>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Submission Final Deadline (YYYY-MM-DD HH:MM:SS)</label>
-                <input type="text" name="submission_deadline" class="form-control" value="{{ settings.submission_deadline }}" required>
+        <h4 style="color: var(--gold); font-size: 1.1rem; margin: 1.5rem 0 1rem;">2. Problem Statement Release Schedule</h4>
+        <div class="form-group">
+            <label class="form-label">Problem Statement Release Datetime (IST) (YYYY-MM-DD HH:MM:SS) <span class="required">*</span></label>
+            <input type="text" name="problem_statement_release_date" class="form-control" value="{{ settings.problem_statement_release_date or '2026-10-25 10:00:00' }}" required>
+            <div class="form-help">
+                Participants and public visitors see an automated live countdown timer until this exact release timestamp arrives.
             </div>
         </div>
 
-        <h4 style="color: var(--gold); font-size: 1.1rem; margin: 1.5rem 0 1rem;">3. Global Operation Switches</h4>
+        <h4 style="color: var(--accent-cyan); font-size: 1.1rem; margin: 1.5rem 0 1rem;">3. Project Submission Window</h4>
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label">Submission Opening Datetime (IST) (YYYY-MM-DD HH:MM:SS) <span class="required">*</span></label>
+                <input type="text" name="submission_start_date" class="form-control" value="{{ settings.submission_start_date }}" required>
+                <div class="form-help">At which time project submissions open.</div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Submission Final Deadline (IST) (YYYY-MM-DD HH:MM:SS) <span class="required">*</span></label>
+                <input type="text" name="submission_deadline" class="form-control" value="{{ settings.submission_deadline }}" required>
+                <div class="form-help">At which time submissions close.</div>
+            </div>
+        </div>
+
+        <h4 style="color: #cbd5e1; font-size: 1.1rem; margin: 1.5rem 0 1rem;">4. Global Operation Switches</h4>
         <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem; background: rgba(0,0,0,0.25); padding: 1.25rem; border-radius: 8px;">
             <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer;">
                 <input type="checkbox" name="registration_open" {% if settings.registration_open == 'true' %}checked{% endif %} style="accent-color: var(--primary); width: 18px; height: 18px;">

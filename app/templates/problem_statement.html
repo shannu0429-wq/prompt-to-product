@@ -10,7 +10,37 @@
             <span class="badge badge-primary">Official Challenge Document</span>
             <h1 style="font-size: 2.5rem; margin-top: 0.75rem;" class="text-gradient">Problem Statement</h1>
             <p class="lead">Prompt to Product – AI Web Challenge by SSRS Group of Companies</p>
+
+            <!-- Release Schedule Timeline Pills -->
+            <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; margin-top: 1.5rem;">
+                <div style="background: rgba(16, 27, 46, 0.85); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.85rem;">
+                    <span style="color: var(--text-muted);">Release Time:</span>
+                    <strong style="color: var(--gold); margin-left: 0.25rem;">{{ site_settings.problem_statement_release_date|ist_datetime }}</strong>
+                </div>
+                <div style="background: rgba(16, 27, 46, 0.85); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.85rem;">
+                    <span style="color: var(--text-muted);">Submissions Open:</span>
+                    <strong style="color: #38bdf8; margin-left: 0.25rem;">{{ site_settings.submission_start_date|ist_datetime }}</strong>
+                </div>
+                <div style="background: rgba(16, 27, 46, 0.85); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.85rem;">
+                    <span style="color: var(--text-muted);">Submission Deadline:</span>
+                    <strong style="color: #f87171; margin-left: 0.25rem;">{{ site_settings.submission_deadline|ist_datetime }}</strong>
+                </div>
+            </div>
         </div>
+
+        {% if is_admin_preview %}
+        <div class="card" style="margin-bottom: 1.5rem; background: rgba(245, 158, 11, 0.12); border-left: 4px solid #f59e0b;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                <div>
+                    <strong style="color: #fde68a;">Administrator Preview Mode:</strong>
+                    <span style="color: #fef3c7; font-size: 0.88rem; margin-left: 0.5rem;">
+                        This statement is hidden from regular participants until <strong>{{ site_settings.problem_statement_release_date|ist_datetime }}</strong>.
+                    </span>
+                </div>
+                <a href="{{ url_for('admin.problem_statement') }}" class="btn btn-sm btn-outline">Edit Statement</a>
+            </div>
+        </div>
+        {% endif %}
 
         {% if problem %}
         <div class="card" style="margin-bottom: 2rem; border-top: 4px solid var(--primary-light);">
@@ -98,12 +128,34 @@
             </div>
         </div>
         {% else %}
-        <div class="card" style="text-align: center; padding: 4rem 2rem;">
-            <h3 style="color: #ffffff; margin-bottom: 1rem;">Problem Statement Coming Soon</h3>
-            <p style="color: #94a3b8; max-width: 500px; margin: 0 auto 2rem;">
-                The technical organizers at SSRS Group of Companies are putting the final touches on the challenge requirements. Please check back shortly or register your team in the meantime.
+        <div class="card" style="text-align: center; padding: 4rem 2rem; border-top: 4px solid var(--gold);">
+            <div style="font-size: 3rem; margin-bottom: 0.5rem;">🔒</div>
+            <span class="badge badge-gold" style="margin-bottom: 1rem;">Official Release Scheduled</span>
+            <h2 style="color: #ffffff; margin-bottom: 0.5rem; font-size: 1.8rem;">Problem Statement Releases On</h2>
+            <p style="color: var(--gold); font-size: 1.3rem; font-weight: 700; margin-bottom: 2rem;">
+                {{ site_settings.problem_statement_release_date|ist_datetime }}
             </p>
-            <a href="{{ url_for('registration.register') }}" class="btn btn-primary">Register Your Team</a>
+
+            <div class="countdown-timer" data-target="{{ site_settings.problem_statement_release_date|iso_datetime }}" style="justify-content: center; margin-bottom: 2rem;">
+                <div class="countdown-unit"><span class="countdown-value days">00</span><span class="countdown-label">Days</span></div>
+                <div class="countdown-colon">:</div>
+                <div class="countdown-unit"><span class="countdown-value hours">00</span><span class="countdown-label">Hours</span></div>
+                <div class="countdown-colon">:</div>
+                <div class="countdown-unit"><span class="countdown-value minutes">00</span><span class="countdown-label">Minutes</span></div>
+                <div class="countdown-colon">:</div>
+                <div class="countdown-unit"><span class="countdown-value seconds">00</span><span class="countdown-label">Seconds</span></div>
+            </div>
+
+            <p style="color: #94a3b8; max-width: 600px; margin: 0 auto 2rem; line-height: 1.7; font-size: 1rem;">
+                The complete challenge brief, architectural specifications, technical guidelines, and evaluation rubrics will automatically unlock here once the timer completes.
+            </p>
+
+            <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+                <a href="{{ url_for('registration.register') }}" class="btn btn-lg btn-primary">Register Your Team in Advance</a>
+                <a href="{{ site_settings.whatsapp_group_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-lg btn-whatsapp">
+                    Join WhatsApp for Alerts &UpperRightArrow;
+                </a>
+            </div>
         </div>
         {% endif %}
 

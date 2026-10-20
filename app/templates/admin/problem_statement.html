@@ -1,39 +1,172 @@
 {% extends "admin/base.html" %}
 
-{% block title %}Problem Statement Management{% endblock %}
-{% block page_title %}Problem Statement Management{% endblock %}
+{% block title %}Problem Statement & Schedule Management{% endblock %}
+{% block page_title %}Problem Statement &amp; Schedule Management{% endblock %}
 
 {% block admin_content %}
-<div style="max-width: 950px;">
+<div style="max-width: 1000px;">
 
-    <!-- Current Published Status Banner -->
+    <!-- 1. TIME ACCESS & SCHEDULE CONTROLS FOR ADMIN -->
+    <div class="card" style="margin-bottom: 2rem; border-top: 4px solid var(--gold);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
+            <div>
+                <span class="badge badge-gold" style="margin-bottom: 0.35rem;">Admin Time Access</span>
+                <h3 style="color: #ffffff; margin: 0.25rem 0;">Release Schedule &amp; Submission Window Timers</h3>
+                <p style="color: var(--text-secondary); font-size: 0.88rem; margin: 0;">
+                    Configure exact timestamps for when the problem statement unlocks for participants and when project submissions open and close. (Format: YYYY-MM-DD HH:MM:SS in Indian Standard Time).
+                </p>
+            </div>
+            <a href="{{ url_for('admin.event_settings') }}" class="btn btn-sm btn-outline">
+                All Event Settings &rarr;
+            </a>
+        </div>
+
+        <!-- Live Timing Status Cards -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+            <div style="background: rgba(0,0,0,0.25); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem;">
+                <span style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Problem Statement Release</span>
+                <div style="color: var(--gold); font-weight: 700; font-size: 1rem; margin: 0.25rem 0;">
+                    {{ site_settings.problem_statement_release_date|ist_datetime }}
+                </div>
+                <div>
+                    {% if site_timeline.is_problem_released %}
+                        <span class="badge badge-success" style="font-size: 0.7rem;">Unlocked &bull; Live to Public</span>
+                    {% else %}
+                        <span class="badge badge-warning" style="font-size: 0.7rem;">Countdown Active &bull; Locked</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div style="background: rgba(0,0,0,0.25); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem;">
+                <span style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Submission Opening Time</span>
+                <div style="color: #38bdf8; font-weight: 700; font-size: 1rem; margin: 0.25rem 0;">
+                    {{ site_settings.submission_start_date|ist_datetime }}
+                </div>
+                <div>
+                    {% if site_timeline.is_submission_started %}
+                        <span class="badge badge-success" style="font-size: 0.7rem;">Started &bull; Accepting Links</span>
+                    {% else %}
+                        <span class="badge badge-warning" style="font-size: 0.7rem;">Opens Soon</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div style="background: rgba(0,0,0,0.25); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem;">
+                <span style="font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Submission Final Deadline</span>
+                <div style="color: #f87171; font-weight: 700; font-size: 1rem; margin: 0.25rem 0;">
+                    {{ site_settings.submission_deadline|ist_datetime }}
+                </div>
+                <div>
+                    {% if site_timeline.is_submission_closed %}
+                        <span class="badge badge-danger" style="font-size: 0.7rem;">Deadline Passed &bull; Locked</span>
+                    {% else %}
+                        <span class="badge badge-primary" style="font-size: 0.7rem;">Submissions Active</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Schedule Update Form -->
+        <form method="POST" action="{{ url_for('admin.problem_statement') }}" style="background: rgba(255,255,255,0.02); padding: 1.25rem; border-radius: 8px; border: 1px solid var(--border-color);">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="action" value="update_schedule">
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" style="font-size: 0.85rem;">Problem Statement Release Date &amp; Time (IST)</label>
+                    <input type="text" name="problem_statement_release_date" class="form-control" value="{{ site_settings.problem_statement_release_date or '2026-10-25 10:00:00' }}" placeholder="YYYY-MM-DD HH:MM:SS" required>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" style="font-size: 0.85rem;">Submission Start Date &amp; Time (IST)</label>
+                    <input type="text" name="submission_start_date" class="form-control" value="{{ site_settings.submission_start_date or '2026-10-25 12:00:00' }}" placeholder="YYYY-MM-DD HH:MM:SS" required>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" style="font-size: 0.85rem;">Submission Deadline Date &amp; Time (IST)</label>
+                    <input type="text" name="submission_deadline" class="form-control" value="{{ site_settings.submission_deadline or '2026-11-30 23:59:59' }}" placeholder="YYYY-MM-DD HH:MM:SS" required>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end;">
+                <button type="submit" class="btn btn-sm btn-primary">
+                    Update Schedule Times &rarr;
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- 2. CURRENT PUBLISHED STATUS BANNER -->
     <div class="card" style="margin-bottom: 2rem; border-left: 4px solid {% if current_published %}var(--success){% else %}var(--warning){% endif %};">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
             <div>
                 <span style="font-size: 0.8rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Live Version on Website</span>
                 {% if current_published %}
                     <h3 style="color: #ffffff; margin: 0.25rem 0;">v{{ current_published.version }}: {{ current_published.title }}</h3>
-                    <p style="color: #cbd5e1; font-size: 0.85rem; margin: 0;">Published at: {{ current_published.published_at|ist_datetime }}</p>
+                    <p style="color: #cbd5e1; font-size: 0.85rem; margin: 0;">
+                        Published: {{ current_published.published_at|ist_datetime }} &bull; 
+                        Scheduled Release: <strong style="color: var(--gold);">{{ site_settings.problem_statement_release_date|ist_datetime }}</strong>
+                        {% if site_timeline.is_problem_released %}
+                            <span class="badge badge-success" style="font-size: 0.65rem; margin-left: 0.5rem;">Unlocked (Live to Public)</span>
+                        {% else %}
+                            <span class="badge badge-warning" style="font-size: 0.65rem; margin-left: 0.5rem;">Countdown Active (Locked to Public)</span>
+                        {% endif %}
+                    </p>
                 {% else %}
                     <h3 style="color: #f59e0b; margin: 0.25rem 0;">No Statement Published (Participants see 'Coming Soon')</h3>
+                    <p style="color: #cbd5e1; font-size: 0.85rem; margin: 0;">Choose a draft below and click 'Publish' to make it live.</p>
                 {% endif %}
             </div>
-            {% if current_published %}
-            <form method="POST" action="{{ url_for('admin.problem_statement') }}" onsubmit="return confirm('Are you sure you want to unpublish this problem statement?');">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <input type="hidden" name="action" value="unpublish">
-                <input type="hidden" name="statement_id" value="{{ current_published.id }}">
-                <button type="submit" class="btn btn-sm btn-danger">Unpublish (Set to Draft)</button>
-            </form>
-            {% endif %}
+            
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <a href="{{ url_for('public.problem_statement') }}" target="_blank" class="btn btn-sm btn-outline">
+                    Preview Public Page &UpperRightArrow;
+                </a>
+                {% if current_published %}
+                <form method="POST" action="{{ url_for('admin.problem_statement') }}" onsubmit="return confirm('Are you sure you want to unpublish this problem statement?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="action" value="unpublish">
+                    <input type="hidden" name="statement_id" value="{{ current_published.id }}">
+                    <button type="submit" class="btn btn-sm btn-danger">Unpublish (Set to Draft)</button>
+                </form>
+                {% endif %}
+            </div>
         </div>
     </div>
 
-    <!-- Create / Edit Form -->
+    <!-- 3. ADD / UPDATE PROBLEM STATEMENT FORM -->
     <div class="card" style="margin-bottom: 2rem;">
-        <h3 style="color: #ffffff; margin-bottom: 1rem;">Create or Edit Problem Statement</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
+            <div>
+                {% if mode == 'new' %}
+                    <span class="badge badge-primary">Creating New Statement</span>
+                    <h3 style="color: #ffffff; margin: 0.25rem 0;">Add New Problem Statement (v{{ next_version }})</h3>
+                {% elif selected_stmt %}
+                    <span class="badge {% if selected_stmt.status == 'published' %}badge-success{% else %}badge-warning{% endif %}">
+                        Editing {{ selected_stmt.status|title }} Version
+                    </span>
+                    <h3 style="color: #ffffff; margin: 0.25rem 0;">Update Problem Statement v{{ selected_stmt.version }}: {{ selected_stmt.title }}</h3>
+                {% else %}
+                    <span class="badge badge-primary">New Statement</span>
+                    <h3 style="color: #ffffff; margin: 0.25rem 0;">Add Problem Statement</h3>
+                {% endif %}
+            </div>
 
-        {% set stmt = current_published or (statements[0] if statements else None) %}
+            <div style="display: flex; gap: 0.5rem;">
+                {% if selected_stmt and mode != 'new' %}
+                    <a href="{{ url_for('admin.problem_statement', mode='new') }}" class="btn btn-sm btn-primary">
+                        + Add New Problem Statement
+                    </a>
+                    <a href="{{ url_for('admin.problem_statement') }}" class="btn btn-sm btn-outline">
+                        Cancel Edit
+                    </a>
+                {% elif mode == 'new' and statements %}
+                    <a href="{{ url_for('admin.problem_statement') }}" class="btn btn-sm btn-outline">
+                        Cancel New Statement
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+
+        {% set stmt = selected_stmt if (mode != 'new' and selected_stmt) else None %}
 
         <form method="POST" action="{{ url_for('admin.problem_statement') }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -41,12 +174,12 @@
 
             <div class="form-group">
                 <label class="form-label">Problem Statement Title <span class="required">*</span></label>
-                <input type="text" name="title" class="form-control" value="{{ stmt.title if stmt else '' }}" placeholder="e.g. AI-Powered Smart Web Solution..." required>
+                <input type="text" name="title" class="form-control" value="{{ stmt.title if stmt else '' }}" placeholder="e.g. AI-Powered Smart Web Solution for Next-Gen Productivity" required>
             </div>
 
             <div class="form-group">
                 <label class="form-label">Challenge Overview / Description <span class="required">*</span></label>
-                <textarea name="description" class="form-control" rows="3" placeholder="Core theme and context..." required>{{ stmt.description if stmt else '' }}</textarea>
+                <textarea name="description" class="form-control" rows="3" placeholder="Core theme, problem context, and expected innovation..." required>{{ stmt.description if stmt else '' }}</textarea>
             </div>
 
             <div class="form-group">
@@ -56,39 +189,47 @@
 
             <div class="form-group">
                 <label class="form-label">2. Requirements &amp; Expected Features</label>
-                <textarea name="requirements" class="form-control" rows="4" placeholder="Technical specs, responsive UI, AI features...">{{ stmt.requirements if stmt else '' }}</textarea>
+                <textarea name="requirements" class="form-control" rows="4" placeholder="Technical specs, responsive UI, AI features, prompt engineering criteria...">{{ stmt.requirements if stmt else '' }}</textarea>
             </div>
 
             <div class="form-group">
                 <label class="form-label">3. Rules &amp; Technical Guidelines</label>
-                <textarea name="guidelines" class="form-control" rows="3" placeholder="Permitted tools, deployment notes...">{{ stmt.guidelines if stmt else '' }}</textarea>
+                <textarea name="guidelines" class="form-control" rows="3" placeholder="Permitted tools, deployment notes, originality guidelines...">{{ stmt.guidelines if stmt else '' }}</textarea>
             </div>
 
             <div class="form-group">
                 <label class="form-label">4. Evaluation Rubric</label>
-                <textarea name="evaluation_criteria" class="form-control" rows="4" placeholder="Marking breakdown (60 marks total)...">{{ stmt.evaluation_criteria if stmt else '' }}</textarea>
+                <textarea name="evaluation_criteria" class="form-control" rows="4" placeholder="Marking breakdown (e.g. 60 marks total across AI integration, UI/UX, responsiveness)...">{{ stmt.evaluation_criteria if stmt else '' }}</textarea>
             </div>
 
             <div class="form-group">
                 <label class="form-label">5. Submission Instructions</label>
-                <textarea name="submission_instructions" class="form-control" rows="3" placeholder="Deployed public URL instructions...">{{ stmt.submission_instructions if stmt else '' }}</textarea>
+                <textarea name="submission_instructions" class="form-control" rows="3" placeholder="Deployed public URL instructions (Vercel, Netlify, Render, etc.)...">{{ stmt.submission_instructions if stmt else '' }}</textarea>
             </div>
 
             <div style="display: flex; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap;">
                 <button type="submit" name="action" value="save_draft" class="btn btn-outline">
-                    Save as Draft
+                    {% if stmt %}Update Draft{% else %}Save as Draft{% endif %}
                 </button>
                 <button type="submit" name="action" value="publish" class="btn btn-primary" onclick="return confirm('Publish this version to all public visitors and logged-in participants?');">
-                    Publish Immediately &rarr;
+                    {% if stmt %}Update &amp; Publish Immediately &rarr;{% else %}Create &amp; Publish Immediately &rarr;{% endif %}
                 </button>
             </div>
         </form>
     </div>
 
-    <!-- Version History Table -->
+    <!-- 4. PUBLICATION & VERSION HISTORY TABLE (WITH UPDATE / REMOVE CONTROLS) -->
     <div class="table-card">
         <div class="table-header">
-            <h3 class="table-title">Publication &amp; Version History</h3>
+            <div>
+                <h3 class="table-title">Problem Statement Versions &amp; History ({{ statements|length }})</h3>
+                <p style="color: var(--text-secondary); font-size: 0.85rem; margin: 0.25rem 0 0;">
+                    Manage, edit, publish, or remove any problem statement version.
+                </p>
+            </div>
+            <a href="{{ url_for('admin.problem_statement', mode='new') }}" class="btn btn-sm btn-primary">
+                + Add New Version
+            </a>
         </div>
         <div class="table-responsive">
             <table class="admin-table">
@@ -97,28 +238,75 @@
                         <th>Version</th>
                         <th>Title</th>
                         <th>Status</th>
-                        <th>Created</th>
-                        <th>Published At</th>
+                        <th>Created (IST)</th>
+                        <th>Published (IST)</th>
+                        <th style="text-align: right;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for s in statements %}
-                    <tr>
+                    <tr style="{% if selected_stmt and selected_stmt.id == s.id and mode != 'new' %}background: rgba(56, 189, 248, 0.08);{% endif %}">
                         <td><strong>v{{ s.version }}</strong></td>
-                        <td style="color: #ffffff;">{{ s.title }}</td>
+                        <td style="color: #ffffff; font-weight: 500;">
+                            {{ s.title }}
+                            {% if selected_stmt and selected_stmt.id == s.id and mode != 'new' %}
+                                <span class="badge badge-primary" style="font-size: 0.65rem; margin-left: 0.5rem;">Editing Now</span>
+                            {% endif %}
+                        </td>
                         <td>
                             {% if s.status == 'published' %}
                                 <span class="badge badge-success">Published</span>
+                            {% elif s.status == 'archived' %}
+                                <span class="badge badge-secondary">Archived</span>
                             {% else %}
-                                <span class="badge badge-secondary">Draft</span>
+                                <span class="badge badge-warning">Draft</span>
                             {% endif %}
                         </td>
-                        <td>{{ s.created_at|ist_datetime }}</td>
-                        <td>{{ s.published_at|ist_datetime if s.published_at else '—' }}</td>
+                        <td style="font-size: 0.82rem; color: #94a3b8;">{{ s.created_at|ist_datetime }}</td>
+                        <td style="font-size: 0.82rem; color: #94a3b8;">{{ s.published_at|ist_datetime if s.published_at else '—' }}</td>
+                        <td style="text-align: right;">
+                            <div style="display: inline-flex; gap: 0.5rem; align-items: center; justify-content: flex-end;">
+                                <!-- Update / Edit Button -->
+                                <a href="{{ url_for('admin.problem_statement', edit_id=s.id) }}" class="btn btn-sm btn-outline" style="padding: 0.25rem 0.65rem; font-size: 0.8rem;">
+                                    Edit
+                                </a>
+
+                                <!-- Publish / Unpublish Toggle -->
+                                {% if s.status != 'published' %}
+                                    <form method="POST" action="{{ url_for('admin.problem_statement') }}" style="display: inline;" onsubmit="return confirm('Set v{{ s.version }} as the active published problem statement on the website?');">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <input type="hidden" name="action" value="publish_existing">
+                                        <input type="hidden" name="statement_id" value="{{ s.id }}">
+                                        <button type="submit" class="btn btn-sm btn-primary" style="padding: 0.25rem 0.65rem; font-size: 0.8rem;">
+                                            Publish
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <form method="POST" action="{{ url_for('admin.problem_statement') }}" style="display: inline;" onsubmit="return confirm('Unpublish v{{ s.version }} and revert it to draft?');">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <input type="hidden" name="action" value="unpublish">
+                                        <input type="hidden" name="statement_id" value="{{ s.id }}">
+                                        <button type="submit" class="btn btn-sm btn-warning" style="padding: 0.25rem 0.65rem; font-size: 0.8rem;">
+                                            Unpublish
+                                        </button>
+                                    </form>
+                                {% endif %}
+
+                                <!-- Delete / Remove Button -->
+                                <form method="POST" action="{{ url_for('admin.problem_statement') }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to permanently delete Problem Statement v{{ s.version }} ({{ s.title }})? This action cannot be undone.');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="statement_id" value="{{ s.id }}">
+                                    <button type="submit" class="btn btn-sm btn-danger" style="padding: 0.25rem 0.65rem; font-size: 0.8rem;">
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="5" style="text-align: center; color: #94a3b8; padding: 1.5rem;">No statement records yet.</td>
+                        <td colspan="6" style="text-align: center; color: #94a3b8; padding: 2rem;">No problem statements recorded yet. Click '+ Add New Version' above to create one.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

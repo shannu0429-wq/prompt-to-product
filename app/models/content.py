@@ -22,7 +22,11 @@ class ProblemStatement(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     @classmethod
-    def get_published(cls):
+    def get_published(cls, allow_unreleased=False):
+        if not allow_unreleased:
+            from app.services.settings_service import SettingsService
+            if not SettingsService.is_problem_statement_released():
+                return None
         return cls.query.filter_by(status='published').order_by(cls.version.desc(), cls.published_at.desc()).first()
 
     def __repr__(self):

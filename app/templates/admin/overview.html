@@ -32,29 +32,66 @@
     </div>
 </div>
 
-<!-- Problem Statement & Actions Banner -->
-<div class="card" style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-    <div>
-        <span style="font-size: 0.8rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Problem Statement Status</span>
-        {% if published_problem %}
-            <h3 style="margin: 0.25rem 0; color: #38bdf8;">
-                v{{ published_problem.version }}: {{ published_problem.title }}
-            </h3>
-            <p style="margin: 0; font-size: 0.85rem; color: #cbd5e1;">
-                Published on {{ published_problem.published_at|ist_datetime }}
-            </p>
-        {% else %}
-            <h3 style="margin: 0.25rem 0; color: #f59e0b;">No Problem Statement Currently Published</h3>
-            <p style="margin: 0; font-size: 0.85rem; color: #cbd5e1;">Participants cannot see the challenge requirements.</p>
-        {% endif %}
+<!-- Problem Statement & Schedule Timing Banner -->
+<div class="card" style="margin-bottom: 2rem; border-top: 3px solid var(--gold);">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.25rem;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem;">
+                <span class="badge badge-gold">Event Schedule &amp; Problem Status</span>
+                {% if site_timeline.is_problem_released %}
+                    <span class="badge badge-success">Problem Unlocked</span>
+                {% else %}
+                    <span class="badge badge-warning">Problem Locked (Countdown Active)</span>
+                {% endif %}
+            </div>
+            {% if published_problem %}
+                <h3 style="margin: 0.25rem 0; color: #ffffff;">
+                    v{{ published_problem.version }}: {{ published_problem.title }}
+                </h3>
+                <p style="margin: 0; font-size: 0.85rem; color: #cbd5e1;">
+                    Published on {{ published_problem.published_at|ist_datetime }}
+                </p>
+            {% else %}
+                <h3 style="margin: 0.25rem 0; color: #f59e0b;">No Problem Statement Published</h3>
+                <p style="margin: 0; font-size: 0.85rem; color: #cbd5e1;">Participants cannot view challenge requirements.</p>
+            {% endif %}
+        </div>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+            <a href="{{ url_for('admin.problem_statement') }}" class="btn btn-sm btn-primary">
+                Manage Problem Statements &rarr;
+            </a>
+            <a href="{{ url_for('admin.event_settings') }}" class="btn btn-sm btn-outline">
+                Event Settings &rarr;
+            </a>
+        </div>
     </div>
-    <div style="display: flex; gap: 0.75rem;">
-        <a href="{{ url_for('admin.problem_statement') }}" class="btn btn-sm btn-primary">
-            Manage Problem Statement
-        </a>
-        <a href="{{ url_for('admin.event_settings') }}" class="btn btn-sm btn-outline">
-            Event Settings
-        </a>
+
+    <!-- Quick Schedule Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+        <div>
+            <span style="font-size: 0.72rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Problem Statement Release</span>
+            <div style="color: var(--gold); font-weight: 600; font-size: 0.92rem; margin-top: 0.2rem;">
+                {{ site_settings.problem_statement_release_date|ist_datetime }}
+            </div>
+        </div>
+        <div>
+            <span style="font-size: 0.72rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Submission Opening</span>
+            <div style="color: #38bdf8; font-weight: 600; font-size: 0.92rem; margin-top: 0.2rem;">
+                {{ site_settings.submission_start_date|ist_datetime }}
+            </div>
+        </div>
+        <div>
+            <span style="font-size: 0.72rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Submission Deadline</span>
+            <div style="color: #f87171; font-weight: 600; font-size: 0.92rem; margin-top: 0.2rem;">
+                {{ site_settings.submission_deadline|ist_datetime }}
+            </div>
+        </div>
+        <div>
+            <span style="font-size: 0.72rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Current Phase</span>
+            <div style="margin-top: 0.2rem;">
+                <span class="badge {{ event_status_class }}">{{ event_status_text }}</span>
+            </div>
+        </div>
     </div>
 </div>
 

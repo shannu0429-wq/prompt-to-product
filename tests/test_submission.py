@@ -45,6 +45,10 @@ def test_url_validation():
 
 def test_submission_lifecycle(app):
     with app.app_context():
+        # Test submission rejected when before submission_start_date
+        SettingsService.set_setting('submission_start_date', '2099-01-01 00:00:00')
+        SettingsService.set_setting('submission_deadline', '2099-12-31 23:59:59')
+
         # Register a team first
         form_data = {
             'team_name': 'CodeCraft',
@@ -60,6 +64,19 @@ def test_submission_lifecycle(app):
         }
         success, team = RegistrationService.register_team(form_data)
         assert success is True
+
+        # Submission before start date should fail
+        early_success, early_msg = SubmissionService.submit_project(
+            team=team,
+            user=team.leader,
+            website_url='https://codecraft.vercel.app',
+            project_description='AI-powered analytics tool'
+        )
+        assert early_success is False
+        assert 'will open on' in early_msg.lower()
+
+        # Now set submission_start_date to past and verify submission succeeds
+        SettingsService.set_setting('submission_start_date', '2020-01-01 00:00:00')
 
         # Initial Submission
         success, sub = SubmissionService.submit_project(

@@ -16,7 +16,8 @@ DEFAULT_SETTINGS = {
     'contact_phone': '+91 98765 43210',
     'registration_start_date': '2026-10-01 00:00:00',
     'registration_end_date': '2026-11-25 23:59:59',
-    'submission_start_date': '2026-10-01 00:00:00',
+    'problem_statement_release_date': '2026-10-25 10:00:00',
+    'submission_start_date': '2026-10-25 12:00:00',
     'submission_deadline': '2026-11-30 23:59:59',
     'submissions_open': 'true',
     'allow_resubmission': 'false',
@@ -144,6 +145,46 @@ class SettingsService:
             return False
 
         return True
+
+    @classmethod
+    def is_problem_statement_released(cls):
+        release_dt = cls.parse_datetime(cls.get_setting('problem_statement_release_date'))
+        if not release_dt:
+            return True
+        return datetime.utcnow() >= release_dt
+
+    @classmethod
+    def is_submission_started(cls):
+        start_dt = cls.parse_datetime(cls.get_setting('submission_start_date'))
+        if not start_dt:
+            return True
+        return datetime.utcnow() >= start_dt
+
+    @classmethod
+    def is_submission_deadline_passed(cls):
+        end_dt = cls.parse_datetime(cls.get_setting('submission_deadline'))
+        if not end_dt:
+            return False
+        return datetime.utcnow() > end_dt
+
+    @classmethod
+    def get_timeline(cls):
+        now = datetime.utcnow()
+        prob_release = cls.parse_datetime(cls.get_setting('problem_statement_release_date'))
+        sub_start = cls.parse_datetime(cls.get_setting('submission_start_date'))
+        sub_end = cls.parse_datetime(cls.get_setting('submission_deadline'))
+        reg_end = cls.parse_datetime(cls.get_setting('registration_end_date'))
+
+        return {
+            'problem_release_date': cls.get_setting('problem_statement_release_date'),
+            'is_problem_released': (not prob_release) or (now >= prob_release),
+            'submission_start_date': cls.get_setting('submission_start_date'),
+            'is_submission_started': (not sub_start) or (now >= sub_start),
+            'submission_deadline': cls.get_setting('submission_deadline'),
+            'is_submission_closed': bool(sub_end and now > sub_end),
+            'registration_deadline': cls.get_setting('registration_end_date'),
+            'is_registration_closed': bool(reg_end and now > reg_end),
+        }
 
     @classmethod
     def get_active_logo(cls):

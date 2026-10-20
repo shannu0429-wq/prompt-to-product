@@ -32,11 +32,13 @@ def create_app(config_name=None):
         status_text, status_class = SettingsService.get_event_status()
         active_logo = SettingsService.get_active_logo()
         settings = SettingsService.get_all_settings()
+        timeline = SettingsService.get_timeline()
         return {
             'site_settings': settings,
             'active_logo': active_logo,
             'event_status_text': status_text,
             'event_status_class': status_class,
+            'site_timeline': timeline,
             'current_year': datetime.now().year,
         }
 
@@ -57,6 +59,21 @@ def create_app(config_name=None):
         dt_utc = dt.replace(tzinfo=timezone.utc)
         dt_ist = dt_utc.astimezone(ist_tz)
         return dt_ist.strftime('%d %b %Y, %I:%M %p IST')
+
+    @app.template_filter('iso_datetime')
+    def iso_datetime_filter(dt):
+        if not dt:
+            return ''
+        if isinstance(dt, str):
+            from app.services.settings_service import SettingsService
+            parsed = SettingsService.parse_datetime(dt)
+            if not parsed:
+                return dt
+            dt = parsed
+        ist_tz = timezone(timedelta(hours=5, minutes=30))
+        dt_utc = dt.replace(tzinfo=timezone.utc)
+        dt_ist = dt_utc.astimezone(ist_tz)
+        return dt_ist.isoformat()
 
     # Register Blueprints
     from app.routes.public import public_bp

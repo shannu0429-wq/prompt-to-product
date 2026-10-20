@@ -41,10 +41,15 @@ def about():
 
 @public_bp.route('/problem-statement')
 def problem_statement():
-    problem = ProblemStatement.get_published()
+    from flask_login import current_user
+    is_admin = current_user.is_authenticated and current_user.is_admin
+    problem = ProblemStatement.get_published(allow_unreleased=is_admin)
+    timeline = SettingsService.get_timeline()
     return render_template(
         'problem_statement.html',
         problem=problem,
+        timeline=timeline,
+        is_admin_preview=(is_admin and not timeline['is_problem_released'])
     )
 
 

@@ -57,15 +57,47 @@
             {% endif %}
         </div>
 
-        <!-- Submission Deadline Card -->
+        <!-- Submission Deadline / Window Card -->
         <div class="card" style="border-left: 4px solid var(--accent-cyan);">
-            <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Submission Deadline</span>
-            <div style="font-size: 1.1rem; font-weight: 700; color: #ffffff; margin: 0.5rem 0;">
-                {{ submission_deadline|ist_datetime }}
+            <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">
+                {% if not site_timeline.is_submission_started %}
+                    Submission Window
+                {% else %}
+                    Submission Deadline
+                {% endif %}
+            </span>
+            <div style="font-size: 1.05rem; font-weight: 700; color: #ffffff; margin: 0.5rem 0;">
+                {% if not site_timeline.is_submission_started %}
+                    Opens: {{ site_timeline.submission_start_date|ist_datetime }}
+                {% else %}
+                    {{ submission_deadline|ist_datetime }}
+                {% endif %}
             </div>
-            <p style="color: var(--text-secondary); font-size: 0.85rem; margin: 0;">
-                Enforced in Indian Standard Time (IST).
-            </p>
+            {% if not site_timeline.is_submission_started %}
+                <div class="countdown-timer" data-target="{{ site_timeline.submission_start_date|iso_datetime }}" style="margin-top: 0.5rem; scale: 0.85; transform-origin: left center;">
+                    <div class="countdown-unit"><span class="countdown-value days">00</span><span class="countdown-label">D</span></div>
+                    <div class="countdown-colon">:</div>
+                    <div class="countdown-unit"><span class="countdown-value hours">00</span><span class="countdown-label">H</span></div>
+                    <div class="countdown-colon">:</div>
+                    <div class="countdown-unit"><span class="countdown-value minutes">00</span><span class="countdown-label">M</span></div>
+                    <div class="countdown-colon">:</div>
+                    <div class="countdown-unit"><span class="countdown-value seconds">00</span><span class="countdown-label">S</span></div>
+                </div>
+            {% elif not site_timeline.is_submission_closed %}
+                <div class="countdown-timer" data-target="{{ site_timeline.submission_deadline|iso_datetime }}" style="margin-top: 0.5rem; scale: 0.85; transform-origin: left center;">
+                    <div class="countdown-unit"><span class="countdown-value days">00</span><span class="countdown-label">D</span></div>
+                    <div class="countdown-colon">:</div>
+                    <div class="countdown-unit"><span class="countdown-value hours">00</span><span class="countdown-label">H</span></div>
+                    <div class="countdown-colon">:</div>
+                    <div class="countdown-unit"><span class="countdown-value minutes">00</span><span class="countdown-label">M</span></div>
+                    <div class="countdown-colon">:</div>
+                    <div class="countdown-unit"><span class="countdown-value seconds">00</span><span class="countdown-label">S</span></div>
+                </div>
+            {% else %}
+                <p style="color: #f87171; font-size: 0.85rem; margin: 0; font-weight: 600;">
+                    Submission window has ended.
+                </p>
+            {% endif %}
         </div>
 
         <!-- WhatsApp Quick Link -->
@@ -137,6 +169,8 @@
                     <h3 style="font-size: 1.25rem; color: #ffffff; margin: 0;">Problem Statement</h3>
                     {% if problem %}
                         <span class="badge badge-success">v{{ problem.version }} Published</span>
+                    {% elif not site_timeline.is_problem_released %}
+                        <span class="badge badge-gold">Release Scheduled</span>
                     {% else %}
                         <span class="badge badge-warning">Pending</span>
                     {% endif %}
@@ -151,6 +185,28 @@
                     </p>
                     <a href="{{ url_for('public.problem_statement') }}" class="btn btn-sm btn-outline">
                         View Detailed Objectives &amp; Evaluation Criteria &rarr;
+                    </a>
+                {% elif not site_timeline.is_problem_released %}
+                    <div style="background: rgba(245, 158, 11, 0.08); border-left: 3px solid var(--gold); padding: 1.25rem; border-radius: 8px; margin-bottom: 1.25rem;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                            <span style="font-size: 1.25rem;">🔒</span>
+                            <strong style="color: #ffffff; font-size: 1.05rem;">Releases on {{ site_timeline.problem_release_date|ist_datetime }}</strong>
+                        </div>
+                        <p style="color: #cbd5e1; font-size: 0.88rem; margin: 0.5rem 0 1rem; line-height: 1.6;">
+                            The full challenge objectives, technical specifications, and scoring criteria will automatically unlock once the countdown completes.
+                        </p>
+                        <div class="countdown-timer" data-target="{{ site_timeline.problem_release_date|iso_datetime }}" style="margin: 0.5rem 0;">
+                            <div class="countdown-unit"><span class="countdown-value days">00</span><span class="countdown-label">Days</span></div>
+                            <div class="countdown-colon">:</div>
+                            <div class="countdown-unit"><span class="countdown-value hours">00</span><span class="countdown-label">Hours</span></div>
+                            <div class="countdown-colon">:</div>
+                            <div class="countdown-unit"><span class="countdown-value minutes">00</span><span class="countdown-label">Mins</span></div>
+                            <div class="countdown-colon">:</div>
+                            <div class="countdown-unit"><span class="countdown-value seconds">00</span><span class="countdown-label">Secs</span></div>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('public.problem_statement') }}" class="btn btn-sm btn-outline">
+                        View Official Problem Statement Page &rarr;
                     </a>
                 {% else %}
                     <p style="color: var(--text-secondary); font-size: 0.9rem;">

@@ -175,6 +175,7 @@ def event_settings():
     if request.method == 'POST':
         SettingsService.set_setting('registration_start_date', request.form.get('registration_start_date', ''))
         SettingsService.set_setting('registration_end_date', request.form.get('registration_end_date', ''))
+        SettingsService.set_setting('problem_statement_release_date', request.form.get('problem_statement_release_date', ''))
         SettingsService.set_setting('submission_start_date', request.form.get('submission_start_date', ''))
         SettingsService.set_setting('submission_deadline', request.form.get('submission_deadline', ''))
         
@@ -193,7 +194,7 @@ def event_settings():
     return render_template('admin/event_settings.html', settings=settings)
 
 
-# 5. PROBLEM STATEMENT MANAGEMENT
+# 5. PROBLEM STATEMENT & SCHEDULE TIMING MANAGEMENT
 @admin_bp.route('/problem-statement', methods=['GET', 'POST'])
 @admin_required
 def problem_statement():
@@ -216,6 +217,9 @@ def problem_statement():
 
             if ps_id:
                 statement = ProblemStatement.query.get(ps_id)
+                if not statement:
+                    flash('Selected problem statement not found.', 'danger')
+                    return redirect(url_for('admin.problem_statement'))
             else:
                 statement = ProblemStatement(created_by=current_user.id)
                 # Next version
@@ -233,16 +237,35 @@ def problem_statement():
             statement.updated_at = datetime.utcnow()
 
             if action == 'publish':
+                # Archive all other published versions so only 1 is active
+                ProblemStatement.query.filter(
+                    ProblemStatement.id != statement.id,
+                    ProblemStatement.status == 'published'
+                ).update({'status': 'archived'})
                 statement.status = 'published'
                 statement.published_at = datetime.utcnow()
                 AuditLog.record('problem_statement_published', 'problem_statement', statement.id, current_user.id, {'version': statement.version})
-                flash(f'Problem Statement v{statement.version} published to website successfully!', 'success')
+                flash(f'Problem Statement v{statement.version} ("{statement.title}") published to website successfully!', 'success')
             else:
                 statement.status = 'draft'
-                AuditLog.record('problem_statement_draft_saved', 'problem_statement', statement.id, current_user.id)
-                flash('Problem Statement draft saved.', 'info')
+                AuditLog.record('problem_statement_draft_saved', 'problem_statement', statement.id, current_user.id, {'version': statement.version})
+                flash(f'Problem Statement v{statement.version} saved as draft.', 'info')
 
             db.session.commit()
+            return redirect(url_for('admin.problem_statement'))
+
+        elif action == 'publish_existing':
+            ps_id = request.form.get('statement_id')
+            stmt = ProblemStatement.query.get_or_404(ps_id)
+            ProblemStatement.query.filter(
+                ProblemStatement.id != stmt.id,
+                ProblemStatement.status == 'published'
+            ).update({'status': 'archived'})
+            stmt.status = 'published'
+            stmt.published_at = datetime.utcnow()
+            db.session.commit()
+            AuditLog.record('problem_statement_published', 'problem_statement', stmt.id, current_user.id, {'version': stmt.version})
+            flash(f'Problem Statement v{stmt.version} ("{stmt.title}") is now published as the live version!', 'success')
             return redirect(url_for('admin.problem_statement'))
 
         elif action == 'unpublish':
@@ -250,16 +273,66 @@ def problem_statement():
             stmt = ProblemStatement.query.get_or_404(ps_id)
             stmt.status = 'draft'
             db.session.commit()
-            AuditLog.record('problem_statement_unpublished', 'problem_statement', stmt.id, current_user.id)
-            flash('Problem Statement has been set back to draft.', 'warning')
+            AuditLog.record('problem_statement_unpublished', 'problem_statement', stmt.id, current_user.id, {'version': stmt.version})
+            flash(f'Problem Statement v{stmt.version} has been set back to draft.', 'warning')
             return redirect(url_for('admin.problem_statement'))
 
+        elif action == 'delete':
+            ps_id = request.form.get('statement_id')
+            stmt = ProblemStatement.query.get_or_404(ps_id)
+            v = stmt.version
+            t = stmt.title
+            db.session.delete(stmt)
+            db.session.commit()
+            AuditLog.record('problem_statement_deleted', 'problem_statement', ps_id, current_user.id, {'version': v, 'title': t})
+            flash(f'Problem Statement v{v} ("{t}") was permanently removed.', 'success')
+            return redirect(url_for('admin.problem_statement'))
+
+        elif action == 'update_schedule':
+            rel_date = request.form.get('problem_statement_release_date', '').strip()
+            sub_start = request.form.get('submission_start_date', '').strip()
+            sub_deadline = request.form.get('submission_deadline', '').strip()
+
+            if rel_date:
+                SettingsService.set_setting('problem_statement_release_date', rel_date)
+            if sub_start:
+                SettingsService.set_setting('submission_start_date', sub_start)
+            if sub_deadline:
+                SettingsService.set_setting('submission_deadline', sub_deadline)
+
+            AuditLog.record('schedule_times_updated', 'site_settings', 0, current_user.id, {
+                'problem_statement_release_date': rel_date,
+                'submission_start_date': sub_start,
+                'submission_deadline': sub_deadline
+            })
+            flash('Event schedule and release times have been updated successfully!', 'success')
+            return redirect(url_for('admin.problem_statement'))
+
+    edit_id = request.args.get('edit_id')
+    mode = request.args.get('mode')  # 'new'
     statements = ProblemStatement.query.order_by(ProblemStatement.version.desc()).all()
-    current_published = ProblemStatement.get_published()
+    current_published = ProblemStatement.query.filter_by(status='published').order_by(ProblemStatement.version.desc()).first()
+
+    selected_stmt = None
+    if mode == 'new':
+        selected_stmt = None
+    elif edit_id:
+        selected_stmt = ProblemStatement.query.get(edit_id)
+    else:
+        selected_stmt = current_published or (statements[0] if statements else None)
+
+    # Next version calculation
+    max_version = db.session.query(db.func.max(ProblemStatement.version)).scalar() or 0
+    next_version = max_version + 1
+
     return render_template(
         'admin/problem_statement.html',
         statements=statements,
-        current_published=current_published
+        current_published=current_published,
+        selected_stmt=selected_stmt,
+        mode=mode,
+        edit_id=edit_id,
+        next_version=next_version
     )
 
 

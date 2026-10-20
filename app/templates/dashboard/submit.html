@@ -17,20 +17,62 @@
         </div>
 
         {% if not can_submit %}
-        <div class="card" style="border-left: 4px solid var(--danger); margin-bottom: 2rem; background: rgba(239, 68, 68, 0.08);">
-            <h4 style="color: #f87171; margin-bottom: 0.5rem;">Submissions Locked</h4>
-            <p style="color: #cbd5e1; font-size: 0.95rem; margin: 0;">
-                {{ reason }}
-            </p>
-            {% if submission %}
-            <div style="margin-top: 1rem;">
-                <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.25rem;">Your current recorded link:</p>
-                <a href="{{ submission.website_url }}" target="_blank" rel="noopener noreferrer" style="color: #38bdf8; font-weight: 600; word-break: break-all;">
-                    {{ submission.website_url }} &UpperRightArrow;
-                </a>
+            {% if not site_timeline.is_submission_started %}
+            <div class="card" style="border-left: 4px solid var(--gold); margin-bottom: 2rem; background: rgba(245, 158, 11, 0.08); text-align: center; padding: 2rem 1.5rem;">
+                <span class="badge badge-gold" style="margin-bottom: 0.5rem;">Submissions Not Open Yet</span>
+                <h3 style="color: #ffffff; font-size: 1.35rem; margin: 0.5rem 0;">Submissions Open On</h3>
+                <p style="color: var(--gold); font-size: 1.15rem; font-weight: 700; margin-bottom: 1.25rem;">
+                    {{ site_timeline.submission_start_date|ist_datetime }}
+                </p>
+                <div class="countdown-timer" data-target="{{ site_timeline.submission_start_date|iso_datetime }}" style="justify-content: center; margin-bottom: 1.25rem;">
+                    <div class="countdown-unit"><span class="countdown-value days">00</span><span class="countdown-label">Days</span></div>
+                    <div class="countdown-colon">:</div>
+                    <div class="countdown-unit"><span class="countdown-value hours">00</span><span class="countdown-label">Hours</span></div>
+                    <div class="countdown-colon">:</div>
+                    <div class="countdown-unit"><span class="countdown-value minutes">00</span><span class="countdown-label">Mins</span></div>
+                    <div class="countdown-colon">:</div>
+                    <div class="countdown-unit"><span class="countdown-value seconds">00</span><span class="countdown-label">Secs</span></div>
+                </div>
+                <p style="color: #cbd5e1; font-size: 0.9rem; margin: 0; line-height: 1.6;">
+                    The submission form below is temporarily disabled and will automatically activate once the countdown finishes.
+                </p>
+            </div>
+            {% else %}
+            <div class="card" style="border-left: 4px solid var(--danger); margin-bottom: 2rem; background: rgba(239, 68, 68, 0.08);">
+                <h4 style="color: #f87171; margin-bottom: 0.5rem;">Submissions Locked</h4>
+                <p style="color: #cbd5e1; font-size: 0.95rem; margin: 0;">
+                    {{ reason }}
+                </p>
+                {% if submission %}
+                <div style="margin-top: 1rem;">
+                    <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.25rem;">Your current recorded link:</p>
+                    <a href="{{ submission.website_url }}" target="_blank" rel="noopener noreferrer" style="color: #38bdf8; font-weight: 600; word-break: break-all;">
+                        {{ submission.website_url }} &UpperRightArrow;
+                    </a>
+                </div>
+                {% endif %}
             </div>
             {% endif %}
-        </div>
+        {% else %}
+            <div class="card" style="border-left: 4px solid var(--accent-cyan); margin-bottom: 2rem; background: rgba(56, 189, 248, 0.06); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding: 1rem 1.5rem;">
+                <div>
+                    <span style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">Submission Window Active</span>
+                    <div style="color: #ffffff; font-size: 0.95rem; font-weight: 600; margin-top: 0.2rem;">
+                        Closes: {{ sub_deadline|ist_datetime }}
+                    </div>
+                </div>
+                {% if not site_timeline.is_submission_closed %}
+                <div class="countdown-timer" data-target="{{ site_timeline.submission_deadline|iso_datetime }}" style="scale: 0.85; transform-origin: right center;">
+                    <div class="countdown-unit"><span class="countdown-value days">00</span><span class="countdown-label">D</span></div>
+                    <div class="countdown-colon">:</div>
+                    <div class="countdown-unit"><span class="countdown-value hours">00</span><span class="countdown-label">H</span></div>
+                    <div class="countdown-colon">:</div>
+                    <div class="countdown-unit"><span class="countdown-value minutes">00</span><span class="countdown-label">M</span></div>
+                    <div class="countdown-colon">:</div>
+                    <div class="countdown-unit"><span class="countdown-value seconds">00</span><span class="countdown-label">S</span></div>
+                </div>
+                {% endif %}
+            </div>
         {% endif %}
 
         <div class="card" style="border-top: 4px solid var(--primary-light);">
