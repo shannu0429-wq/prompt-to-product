@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: prompt-to-product
+    env: python
+    plan: free
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn run:app"
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: REGISTRATION_OPEN
+        value: "true"
+      - key: EMAIL_VERIFICATION_REQUIRED
+        value: "false"
+      - key: SESSION_COOKIE_SECURE
+        value: "true"
+      - key: MAIL_SERVER
+        value: "smtp.gmail.com"
+      - key: MAIL_PORT
+        value: "587"
+      - key: MAIL_USE_TLS
+        value: "true"
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_DEFAULT_SENDER
+        value: "noreply@ssrsgc.com"

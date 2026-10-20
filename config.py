@@ -19,7 +19,15 @@ class Config:
     MYSQL_PASSWORD = os.getenv('MYSQL_PASSWORD', 'admin')
 
     default_db_uri = f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DATABASE}?charset=utf8mb4"
-    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', default_db_uri)
+    raw_db_url = os.getenv('DATABASE_URL')
+    if raw_db_url:
+        if raw_db_url.startswith('mysql://'):
+            raw_db_url = raw_db_url.replace('mysql://', 'mysql+pymysql://', 1)
+        elif raw_db_url.startswith('postgres://'):
+            raw_db_url = raw_db_url.replace('postgres://', 'postgresql://', 1)
+        SQLALCHEMY_DATABASE_URI = raw_db_url
+    else:
+        SQLALCHEMY_DATABASE_URI = default_db_uri
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_recycle': 280,
