@@ -44,6 +44,10 @@ ENV/
 app/static/images/uploads/*
 !app/static/images/uploads/.gitkeep
 
+# Database backups
+backups/*.sql
+backups/*.dump
+
 # IDE specific files
 .vscode/
 .idea/

@@ -190,7 +190,7 @@ def forgot_password():
             db.session.add(reset_record)
             db.session.commit()
 
-            base_url = current_app.config.get('PUBLIC_BASE_URL', 'http://127.0.0.1:5000').rstrip('/')
+            base_url = (current_app.config.get('PUBLIC_BASE_URL') or request.host_url).rstrip('/')
             reset_url = f"{base_url}/reset-password/{raw_token}"
 
             EmailService.send_password_reset_email(user, reset_url)

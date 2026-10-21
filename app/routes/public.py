@@ -70,3 +70,28 @@ def contact():
             flash('Thank you for contacting the organizing team! We will get back to you shortly.', 'success')
             return redirect(url_for('public.contact'))
     return render_template('contact.html')
+
+
+@public_bp.route('/health')
+def health_check():
+    """Health check endpoint for Render, load balancers, and external monitoring."""
+    from datetime import datetime, timezone
+    from sqlalchemy import text
+    from app.extensions import db
+
+    db_status = 'connected'
+    status_code = 200
+
+    try:
+        db.session.execute(text('SELECT 1'))
+    except Exception as e:
+        db_status = 'unreachable'
+        status_code = 503
+
+    return {
+        'status': 'healthy' if status_code == 200 else 'degraded',
+        'service': 'Prompt to Product – AI Web Challenge',
+        'database': db_status,
+        'timestamp': datetime.now(timezone.utc).isoformat()
+    }, status_code
+

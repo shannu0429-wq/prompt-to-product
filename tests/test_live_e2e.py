@@ -38,10 +38,17 @@ def client(app):
 
 
 def test_public_pages(client):
-    pages = ['/', '/about', '/problem-statement', '/rules', '/contact', '/login', '/register', '/admin/login']
+    pages = ['/', '/about', '/problem-statement', '/rules', '/contact', '/login', '/register', '/admin/login', '/health']
     for p in pages:
         res = client.get(p)
         assert res.status_code == 200, f"Page {p} returned status {res.status_code}"
+    
+    # Verify health check payload
+    health_res = client.get('/health')
+    assert health_res.status_code == 200
+    data = health_res.get_json()
+    assert data['status'] == 'healthy'
+    assert data['database'] == 'connected'
 
 
 def test_super_admin_authenticated_flows(client):

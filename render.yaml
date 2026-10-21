@@ -4,7 +4,8 @@ services:
     env: python
     plan: free
     buildCommand: "./build.sh"
-    startCommand: "gunicorn run:app"
+    startCommand: "gunicorn --workers=2 --threads=4 --timeout=120 --bind=0.0.0.0:$PORT run:app"
+    healthCheckPath: /health
     envVars:
       - key: FLASK_ENV
         value: production

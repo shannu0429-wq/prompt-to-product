@@ -1,6 +1,7 @@
 import os
 from datetime import datetime, timezone, timedelta
 from flask import Flask, render_template
+from werkzeug.middleware.proxy_fix import ProxyFix
 from config import config_by_name
 from app.extensions import db, migrate, login_manager, csrf, mail
 from app.models.user import User
@@ -143,5 +144,8 @@ def create_app(config_name=None):
     def create_admin_cmd():
         from scripts.create_admin import run_create_admin
         run_create_admin()
+
+    # Enable ProxyFix for reverse proxies (Render, Cloudflare, load balancers)
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
     return app
