@@ -1,9 +1,42 @@
 import os
+import urllib.parse
 from datetime import timedelta
 from dotenv import load_dotenv
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 load_dotenv(os.path.join(basedir, '.env'))
+
+
+def _normalize_database_uri(url: str) -> str:
+    """Normalize and sanitize cloud database connection strings (TiDB, Render, Neon, etc.)."""
+    if not url:
+        return url
+    # Ensure pure-Python drivers are used in container environments
+    if url.startswith('mysql+mysqldb://'):
+        url = url.replace('mysql+mysqldb://', 'mysql+pymysql://', 1)
+    elif url.startswith('mysql://'):
+        url = url.replace('mysql://', 'mysql+pymysql://', 1)
+    elif url.startswith('postgres://'):
+        url = url.replace('postgres://', 'postgresql://', 1)
+
+    parsed = urllib.parse.urlsplit(url)
+    path = parsed.path
+    # Automatically map default /sys or empty schema to prompt_to_product
+    if path in ('/sys', '/sys/', '', '/'):
+        path = '/prompt_to_product'
+
+    if 'pymysql' in parsed.scheme:
+        params = urllib.parse.parse_qs(parsed.query) if parsed.query else {}
+        # Remove MySQLdb-specific options that break PyMySQL
+        params.pop('ssl_mode', None)
+        if '<CA_PATH>' in params.get('ssl_ca', [''])[0]:
+            params.pop('ssl_ca', None)
+        new_query = urllib.parse.urlencode({k: v[0] for k, v in params.items()})
+        parsed = parsed._replace(path=path, query=new_query)
+    else:
+        parsed = parsed._replace(path=path)
+
+    return urllib.parse.urlunsplit(parsed)
 
 
 class Config:
@@ -21,11 +54,7 @@ class Config:
     default_db_uri = f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DATABASE}?charset=utf8mb4"
     raw_db_url = os.getenv('DATABASE_URL')
     if raw_db_url:
-        if raw_db_url.startswith('mysql://'):
-            raw_db_url = raw_db_url.replace('mysql://', 'mysql+pymysql://', 1)
-        elif raw_db_url.startswith('postgres://'):
-            raw_db_url = raw_db_url.replace('postgres://', 'postgresql://', 1)
-        SQLALCHEMY_DATABASE_URI = raw_db_url
+        SQLALCHEMY_DATABASE_URI = _normalize_database_uri(raw_db_url)
     elif os.getenv('RENDER') and MYSQL_HOST == 'localhost':
         # Render cloud environment fallback before external DATABASE_URL is added to environment
         SQLALCHEMY_DATABASE_URI = f"sqlite:///{os.path.join(basedir, 'render_app.db')}"
@@ -36,6 +65,7 @@ class Config:
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_recycle': 280,
         'pool_pre_ping': True,
+        **({'connect_args': {'ssl': {}}} if ('tidbcloud.com' in SQLALCHEMY_DATABASE_URI or 'ssl' in SQLALCHEMY_DATABASE_URI) else {})
     } if not SQLALCHEMY_DATABASE_URI.startswith('sqlite') else {}
 
     # Session and Cookie Security
