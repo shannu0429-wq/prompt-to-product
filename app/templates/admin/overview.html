@@ -1,12 +1,35 @@
 {% extends "admin/base.html" %}
 
-{% block title %}Overview{% endblock %}
+{% block title %}Dashboard Overview{% endblock %}
 {% block page_title %}Dashboard Overview{% endblock %}
 
 {% block admin_content %}
 
+<!-- Live Control & Refresh Toolbar -->
+<div class="card" style="margin-bottom: 1.5rem; padding: 0.85rem 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; background: rgba(16, 27, 46, 0.85); border: 1px solid var(--border-color);">
+    <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+        <span class="badge badge-success" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #22c55e;"></span>
+            Online Database Active
+        </span>
+        <span style="font-size: 0.85rem; color: #94a3b8;">
+            Real-time queries &bull; Zero sample data &bull; Auto-persisted to MySQL
+        </span>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+        <label style="display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.82rem; color: #cbd5e1; cursor: pointer; user-select: none;">
+            <input type="checkbox" id="autoRefreshToggle" style="accent-color: var(--primary);">
+            <span>Auto-refresh (30s)</span>
+        </label>
+        <button onclick="window.location.reload();" class="btn btn-sm btn-outline" style="padding: 0.35rem 0.85rem; font-size: 0.82rem; display: inline-flex; align-items: center; gap: 0.35rem;">
+            <span>&#x21bb;</span> Refresh Stats
+        </button>
+    </div>
+</div>
+
 <!-- Live Database Stats Grid -->
-<div class="stats-grid">
+<div class="stats-grid" style="margin-bottom: 2rem;">
     <div class="stat-box">
         <span class="stat-box-title">Total Teams</span>
         <div class="stat-box-number">{{ total_teams }}</div>
@@ -29,6 +52,14 @@
         <span class="stat-box-title">Shortlisted</span>
         <div class="stat-box-number">{{ shortlisted_submissions }}</div>
         <span class="stat-box-sub">Marked by evaluation jury</span>
+    </div>
+
+    <div class="stat-box">
+        <span class="stat-box-title">Problem Statements</span>
+        <div class="stat-box-number">
+            {% if published_problem %}v{{ published_problem.version }}{% else %}None{% endif %}
+        </div>
+        <span class="stat-box-sub">{{ total_statements }} total versions in DB</span>
     </div>
 </div>
 
@@ -95,62 +126,112 @@
     </div>
 </div>
 
-<!-- Recent Teams Table -->
-<div class="table-card">
-    <div class="table-header">
-        <h3 class="table-title">Recent Team Registrations</h3>
-        <a href="{{ url_for('admin.registrations') }}" class="btn btn-sm btn-outline">View All Registrations &rarr;</a>
+<!-- Two-Column Layout: Recent Teams & Recent Submissions -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+
+    <!-- Recent Teams Table -->
+    <div class="table-card" style="margin-bottom: 0;">
+        <div class="table-header">
+            <h3 class="table-title">Recent Registrations</h3>
+            <a href="{{ url_for('admin.registrations') }}" class="btn btn-sm btn-outline">View All &rarr;</a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Team</th>
+                        <th>Leader</th>
+                        <th>Size</th>
+                        <th>Submitted</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in recent_teams %}
+                    <tr>
+                        <td>
+                            <strong style="color: #ffffff;">{{ t.team_name }}</strong><br>
+                            <span style="color: var(--gold); font-family: 'JetBrains Mono', monospace; font-size: 0.75rem;">{{ t.registration_id }}</span>
+                        </td>
+                        <td>{{ t.leader.full_name }}<br><span style="font-size: 0.72rem; color: #94a3b8;">{{ t.leader.email }}</span></td>
+                        <td>{{ t.team_size }}</td>
+                        <td>
+                            {% if t.submission %}
+                                <span class="badge badge-success" style="font-size: 0.7rem;">Yes</span>
+                            {% else %}
+                                <span class="badge badge-warning" style="font-size: 0.7rem;">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('admin.team_detail', team_id=t.id) }}" class="btn btn-sm btn-outline" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">Details</a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #94a3b8; padding: 2rem;">No teams registered yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <div class="table-responsive">
-        <table class="admin-table">
-            <thead>
-                <tr>
-                    <th>Registration ID</th>
-                    <th>Team Name</th>
-                    <th>Leader</th>
-                    <th>Size</th>
-                    <th>Status</th>
-                    <th>Submitted</th>
-                    <th>Registered At</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for t in recent_teams %}
-                <tr>
-                    <td><strong style="color: var(--gold); font-family: 'JetBrains Mono', monospace;">{{ t.registration_id }}</strong></td>
-                    <td style="font-weight: 600; color: #ffffff;">{{ t.team_name }}</td>
-                    <td>{{ t.leader.full_name }}<br><span style="font-size: 0.75rem; color: #94a3b8;">{{ t.leader.email }}</span></td>
-                    <td>{{ t.team_size }}</td>
-                    <td><span class="badge badge-primary" style="font-size: 0.7rem;">{{ t.registration_status }}</span></td>
-                    <td>
-                        {% if t.submission %}
-                            <span class="badge badge-success" style="font-size: 0.7rem;">Yes</span>
-                        {% else %}
-                            <span class="badge badge-warning" style="font-size: 0.7rem;">No</span>
-                        {% endif %}
-                    </td>
-                    <td>{{ t.created_at|ist_datetime }}</td>
-                    <td>
-                        <a href="{{ url_for('admin.team_detail', team_id=t.id) }}" class="btn btn-sm btn-outline">Manage</a>
-                    </td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="8" style="text-align: center; color: #94a3b8; padding: 2rem;">No teams registered yet.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <!-- Recent Submissions Table -->
+    <div class="table-card" style="margin-bottom: 0;">
+        <div class="table-header">
+            <h3 class="table-title">Recent Project Submissions</h3>
+            <a href="{{ url_for('admin.submissions') }}" class="btn btn-sm btn-outline">All Submissions &rarr;</a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>ID &amp; Team</th>
+                        <th>Website Link</th>
+                        <th>Status</th>
+                        <th>Submitted At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sub in recent_submissions %}
+                    <tr>
+                        <td>
+                            <strong style="color: var(--gold); font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;">{{ sub.submission_id }}</strong><br>
+                            <span style="color: #ffffff; font-size: 0.82rem;">{{ sub.team.team_name }}</span>
+                        </td>
+                        <td style="max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            <a href="{{ sub.website_url }}" target="_blank" rel="noopener noreferrer" style="color: #38bdf8; font-size: 0.82rem;">
+                                {{ sub.website_url }} &UpperRightArrow;
+                            </a>
+                        </td>
+                        <td>
+                            <span class="badge {% if sub.status == 'shortlisted' %}badge-gold{% elif sub.status == 'submitted' %}badge-primary{% else %}badge-secondary{% endif %}" style="font-size: 0.7rem;">
+                                {{ sub.status|title }}
+                            </span>
+                        </td>
+                        <td style="font-size: 0.78rem; color: #94a3b8;">
+                            {{ sub.submitted_at|ist_datetime }}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: #94a3b8; padding: 2rem;">No project submissions recorded yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
+
 </div>
 
 <!-- Recent Security & Audit Logs -->
 <div class="table-card">
     <div class="table-header">
-        <h3 class="table-title">Recent System Audit Events</h3>
-        <a href="{{ url_for('admin.audit_logs') }}" class="btn btn-sm btn-outline">Full Audit Trail &rarr;</a>
+        <h3 class="table-title">Recent System Audit Trail</h3>
+        <a href="{{ url_for('admin.audit_logs') }}" class="btn btn-sm btn-outline">Full Audit Logs &rarr;</a>
     </div>
 
     <div class="table-responsive">
@@ -158,9 +239,10 @@
             <thead>
                 <tr>
                     <th>Action</th>
-                    <th>Entity</th>
+                    <th>Entity Type</th>
                     <th>Entity ID</th>
-                    <th>Timestamp</th>
+                    <th>Actor</th>
+                    <th>Timestamp (IST)</th>
                 </tr>
             </thead>
             <tbody>
@@ -169,16 +251,52 @@
                     <td><span style="font-weight: 600; color: #38bdf8;">{{ log.action.replace('_', ' ').title() }}</span></td>
                     <td>{{ log.entity_type }}</td>
                     <td>{{ log.entity_id or '—' }}</td>
+                    <td>{{ log.actor.full_name if log.actor else 'System' }}</td>
                     <td>{{ log.created_at|ist_datetime }}</td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="4" style="text-align: center; color: #94a3b8; padding: 1.5rem;">No audit logs yet.</td>
+                    <td colspan="5" style="text-align: center; color: #94a3b8; padding: 1.5rem;">No audit logs yet.</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
+
+<script>
+// Auto-refresh logic (30 seconds periodic refresh without duplicate actions)
+(function() {
+    const toggle = document.getElementById('autoRefreshToggle');
+    if (!toggle) return;
+    
+    // Restore preference from localStorage
+    const saved = localStorage.getItem('adminAutoRefresh');
+    if (saved === 'true') {
+        toggle.checked = true;
+    }
+
+    let intervalId = null;
+    function applyState() {
+        if (toggle.checked) {
+            localStorage.setItem('adminAutoRefresh', 'true');
+            if (!intervalId) {
+                intervalId = setInterval(() => {
+                    window.location.reload();
+                }, 30000);
+            }
+        } else {
+            localStorage.setItem('adminAutoRefresh', 'false');
+            if (intervalId) {
+                clearInterval(intervalId);
+                intervalId = null;
+            }
+        }
+    }
+
+    toggle.addEventListener('change', applyState);
+    applyState();
+})();
+</script>
 
 {% endblock %}
