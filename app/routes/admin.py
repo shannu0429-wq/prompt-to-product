@@ -66,7 +66,11 @@ def overview():
     pending_submissions = Submission.query.filter_by(status='submitted').count()
     shortlisted_submissions = Submission.query.filter_by(status='shortlisted').count()
     verified_emails = User.query.filter_by(email_verified=True).count()
+    total_statements = ProblemStatement.query.count()
+    published_statements = ProblemStatement.query.filter_by(status='published').count()
+
     recent_teams = Team.query.order_by(Team.created_at.desc()).limit(8).all()
+    recent_submissions = Submission.query.order_by(Submission.submitted_at.desc()).limit(6).all()
     recent_logs = AuditLog.query.order_by(AuditLog.created_at.desc()).limit(10).all()
 
     status_text, status_class = SettingsService.get_event_status()
@@ -81,7 +85,10 @@ def overview():
         pending_submissions=pending_submissions,
         shortlisted_submissions=shortlisted_submissions,
         verified_emails=verified_emails,
+        total_statements=total_statements,
+        published_statements=published_statements,
         recent_teams=recent_teams,
+        recent_submissions=recent_submissions,
         recent_logs=recent_logs,
         event_status_text=status_text,
         event_status_class=status_class,
