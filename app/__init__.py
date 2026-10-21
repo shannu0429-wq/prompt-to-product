@@ -149,3 +149,11 @@ def create_app(config_name=None):
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
     return app
+
+
+# WSGI application instance for servers configured with `gunicorn app:app`
+try:
+    app = create_app()
+except Exception as _app_init_err:
+    app = None
+

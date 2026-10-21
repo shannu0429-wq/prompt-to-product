@@ -31,6 +31,9 @@ def _normalize_database_uri(url: str) -> str:
         params.pop('ssl_mode', None)
         if '<CA_PATH>' in params.get('ssl_ca', [''])[0]:
             params.pop('ssl_ca', None)
+        if 'tidbcloud.com' in parsed.netloc:
+            # Enforce PyMySQL TLS verification on TiDB Cloud
+            params['ssl_verify_cert'] = ['true']
         new_query = urllib.parse.urlencode({k: v[0] for k, v in params.items()})
         parsed = parsed._replace(path=path, query=new_query)
     else:
@@ -65,7 +68,7 @@ class Config:
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_recycle': 280,
         'pool_pre_ping': True,
-        **({'connect_args': {'ssl': {}}} if ('tidbcloud.com' in SQLALCHEMY_DATABASE_URI or 'ssl' in SQLALCHEMY_DATABASE_URI) else {})
+        **({'connect_args': {'ssl': {'check_hostname': False}}} if ('tidbcloud.com' in SQLALCHEMY_DATABASE_URI or 'ssl' in SQLALCHEMY_DATABASE_URI) else {})
     } if not SQLALCHEMY_DATABASE_URI.startswith('sqlite') else {}
 
     # Session and Cookie Security
